@@ -26,5 +26,11 @@
         "react/jsx-indent": [2, 4],
         "max-len": 0,
         "react/jsx-no-bind": 0
+    },
+
+    "settings": {
+        "import/resolver": {
+            "node": { "moduleDirectory": ["node_modules", "src"] }
+        }
     }
 }

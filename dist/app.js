@@ -57,15 +57,15 @@
 	
 	var _reactRedux = __webpack_require__(/*! react-redux */ 168);
 	
-	var _configureStore = __webpack_require__(/*! ./configureStore */ 194);
+	var _configureStore = __webpack_require__(/*! js/configureStore */ 194);
 	
 	var _configureStore2 = _interopRequireDefault(_configureStore);
 	
-	var _component = __webpack_require__(/*! ./Map/component.js */ 201);
+	var _component = __webpack_require__(/*! js/Map/component.js */ 201);
 	
 	var _component2 = _interopRequireDefault(_component);
 	
-	var _actions = __webpack_require__(/*! ./common/TimeMachine/actions */ 200);
+	var _actions = __webpack_require__(/*! js/common/TimeMachine/actions */ 200);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
