@@ -3,17 +3,19 @@ import {render} from 'react-dom';
 import {Provider} from 'react-redux';
 
 import configureStore from 'js/configureStore';
-import Map from 'js/Map/component';
+import App from 'js/App/component';
 import {start, setRealTime} from 'js/TimeMachine/actions';
+import {listenToKeys} from 'js/App/actions';
 
 global.store = configureStore({debug: process.env.NODE_ENV === ''});
 
 global.store.dispatch(setRealTime(Date.now()));
 global.store.dispatch(start());
+global.store.dispatch(listenToKeys());
 
 render(
     <Provider store={global.store}>
-        <Map />
+        <App />
     </Provider>,
     document.body.querySelector('.app-view')
 );
