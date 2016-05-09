@@ -1,7 +1,7 @@
 import {combineReducers} from 'redux';
 
-import common from './common/reducer';
+import timeMachine from './TimeMachine/reducer';
 
 export default combineReducers({
-    common,
+    timeMachine,
 });

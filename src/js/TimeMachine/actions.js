@@ -52,7 +52,7 @@ export function update() {
             realTime,
             speed,
             stopBlock,
-        } = getState().common.timeMachine;
+        } = getState().timeMachine;
         const now = Date.now();
         const lapse = now - realTime;
 

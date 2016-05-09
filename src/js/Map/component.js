@@ -23,9 +23,9 @@ Map.propTypes = {
 };
 
 const mapStateToProps = createStructuredSelector({
-    radius: (state) => state.common.timeMachine.time * 0.001,
-    cx: (state) => state.common.timeMachine.time * 0.002,
-    cy: (state) => state.common.timeMachine.time * 0.003,
+    radius: (state) => state.timeMachine.time * 0.001,
+    cx: (state) => state.timeMachine.time * 0.002,
+    cy: (state) => state.timeMachine.time * 0.003,
 });
 
 export default connect(mapStateToProps)(Map);

@@ -3,8 +3,8 @@ import {render} from 'react-dom';
 import {Provider} from 'react-redux';
 
 import configureStore from 'js/configureStore';
-import Map from 'js/Map/component.js';
-import {start, setRealTime} from 'js/common/TimeMachine/actions';
+import Map from 'js/Map/component';
+import {start, setRealTime} from 'js/TimeMachine/actions';
 
 global.store = configureStore({debug: process.env.NODE_ENV === ''});
 
