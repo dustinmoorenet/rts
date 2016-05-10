@@ -1,11 +1,11 @@
 import {combineReducers} from 'redux';
 
 import {
-    SET_KEY,
+    SET_HOT_KEY,
 } from './actions';
 
-function key(state = '', action = {}) {
-    if (action.type === SET_KEY) {
+function hotKey(state = '', action = {}) {
+    if (action.type === SET_HOT_KEY) {
         return action.payload;
     }
 
@@ -13,5 +13,5 @@ function key(state = '', action = {}) {
 }
 
 export default combineReducers({
-    key,
+    hotKey,
 });

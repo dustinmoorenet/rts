@@ -1,28 +1,48 @@
-const BASE = 'js/app';
-export const SET_KEY = `${BASE}/SET_KEY`;
+const BASE = 'app';
+export const SET_HOT_KEY = `${BASE}/SET_HOT_KEY`;
 
-export function setKey(key = null) {
+export function setHotKey(hotKey = null) {
     return {
-        type: SET_KEY,
-        payload: key,
+        type: SET_HOT_KEY,
+        payload: hotKey,
     };
 }
 
 export function listenToKeys() {
     return (dispatch) => {
-        document.addEventListener('keydown', (event) => dispatch(onKeyDown(event)));
-        document.addEventListener('keyup', () => dispatch(onKeyUp()));
+        document.addEventListener('keydown', (event) => dispatch(onKeyPress(event)));
     };
 }
 
-export function onKeyDown(event) {
+export function onKeyPress(event) {
     return (dispatch) => {
-        dispatch(setKey(event.code));
+        const keys = [];
+        if (event.shiftKey) {
+            keys.push('Shift');
+        }
+
+        if (event.ctrlKey) {
+            keys.push('Ctrl');
+        }
+
+        if (event.altKey) {
+            keys.push('Alt');
+        }
+
+        if (event.metaKey) {
+            keys.push('Meta');
+        }
+
+        if (!event.code.match(/Shift|Alt|Control|OS/)) {
+            keys.push(event.code);
+        }
+
+        dispatch(setHotKey(keys.join('+')));
     };
 }
 
-export function onKeyUp() {
+export function clearHotKey() {
     return (dispatch) => {
-        dispatch(setKey(''));
+        dispatch(setHotKey(''));
     };
 }

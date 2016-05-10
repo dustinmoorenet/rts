@@ -3,6 +3,7 @@ import {combineReducers} from 'redux';
 import {
     SET_SPEED,
     SET_TIME,
+    SET_LAST_TIME,
     SET_REAL_TIME,
     SET_STOP_BLOCK,
 } from './actions';
@@ -17,6 +18,14 @@ function speed(state = 1, action = {}) {
 
 function time(state = 0, action = {}) {
     if (action.type === SET_TIME) {
+        return action.payload;
+    }
+
+    return state;
+}
+
+function lastTime(state = 0, action = {}) {
+    if (action.type === SET_LAST_TIME) {
         return action.payload;
     }
 
@@ -42,6 +51,7 @@ function stopBlock(state = false, action = {}) {
 export default combineReducers({
     speed,
     time,
+    lastTime,
     realTime,
     stopBlock,
 });

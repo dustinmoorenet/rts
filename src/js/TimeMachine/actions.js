@@ -1,9 +1,9 @@
-export const BASE = 'common/timeMachine';
+export const BASE = 'timeMachine';
 export const SET_SPEED = `${BASE}/SET_SPEED`;
 export const SET_TIME = `${BASE}/SET_TIME`;
+export const SET_LAST_TIME = `${BASE}/SET_LAST_TIME`;
 export const SET_REAL_TIME = `${BASE}/SET_REAL_TIME`;
 export const SET_STOP_BLOCK = `${BASE}/SET_STOP_BLOCK`;
-export const UPDATE_INTERVAL = 1000;
 
 export function setSpeed(speed) {
     return {
@@ -16,6 +16,13 @@ export function setTime(time) {
     return {
         type: SET_TIME,
         payload: time,
+    };
+}
+
+export function setLastTime(lastTime) {
+    return {
+        type: SET_LAST_TIME,
+        payload: lastTime,
     };
 }
 
@@ -58,9 +65,10 @@ export function update() {
 
         dispatch(setTime(time + (speed * lapse)));
         dispatch(setRealTime(now));
+        dispatch(setLastTime(time));
 
         if (!stopBlock) {
-            setTimeout(() => dispatch(update()), UPDATE_INTERVAL);
+            requestAnimationFrame(() => dispatch(update()));
         }
     };
 }
