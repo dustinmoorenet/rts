@@ -15,10 +15,18 @@ global.store.dispatch(start());
 global.store.dispatch(listenToKeys());
 global.store.dispatch(set({
     1: {
+        type: 'spritePlayer',
         id: 1,
         r: 20,
         cx: 40,
         cy: 40,
+    },
+    2: {
+        type: 'sprite',
+        id: 2,
+        r: 50,
+        cx: 100,
+        cy: 100,
     },
 }));
 

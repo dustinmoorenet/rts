@@ -5,10 +5,16 @@ import {
 
 export function move(id, direction, amount) {
     return (dispatch, getState) => {
+        const unit = getState().population[id];
+
+        if (!unit) {
+            return;
+        }
+
         const {
             cx,
             cy,
-        } = getState().population[id];
+        } = unit;
 
         let moreX = 0;
         let moreY = 0;
@@ -37,16 +43,22 @@ export function move(id, direction, amount) {
                 }
             ));
 
-            dispatch(attrition(id, (Math.abs(moreX) + Math.abs(moreY)) * 0.1));
+            dispatch(attrition(id, (Math.abs(moreX) + Math.abs(moreY)) * 0.01));
         }
     };
 }
 
 export function attrition(id, amount) {
     return (dispatch, getState) => {
+        const unit = getState().population[id];
+
+        if (!unit) {
+            return;
+        }
+
         const {
             r,
-        } = getState().population[id];
+        } = unit;
         const radius = r - amount;
 
         dispatch(updateUnit(id,

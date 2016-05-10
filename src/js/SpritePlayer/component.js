@@ -3,11 +3,15 @@ import {connect} from 'react-redux';
 import {createStructuredSelector} from 'reselect';
 
 import {
+    clearHotKey,
+} from 'js/App/actions';
+
+import {
     move,
     attrition,
-} from './actions';
+} from 'js/Sprite/actions';
 
-export class Sprite extends Component {
+export class SpritePlayer extends Component {
     static propTypes = {
         id: PropTypes.number.isRequired,
         r: PropTypes.number.isRequired,
@@ -16,6 +20,7 @@ export class Sprite extends Component {
         hotKey: PropTypes.string.isRequired,
         time: PropTypes.number.isRequired,
         lastTime: PropTypes.number.isRequired,
+        clearHotKey: PropTypes.func.isRequired,
         move: PropTypes.func.isRequired,
         attrition: PropTypes.func.isRequired,
     }
@@ -25,8 +30,8 @@ export class Sprite extends Component {
             return;
         }
 
-        if (this.props.time !== nextProps.time) {
-            this.move();
+        if (nextProps.hotKey && this.props.time !== nextProps.time) {
+            this.move(nextProps.hotKey);
         }
 
         if (this.props.time !== nextProps.time) {
@@ -34,25 +39,26 @@ export class Sprite extends Component {
         }
     }
 
-    move() {
-        const randomNumber = Math.random();
+    move(hotKey) {
         let direction;
 
-        if (randomNumber > 0.95) {
+        if (hotKey === 'ArrowUp') {
             direction = 'up';
         }
-        else if (randomNumber > 0.90) {
+        else if (hotKey === 'ArrowRight') {
             direction = 'right';
         }
-        else if (randomNumber > 0.85) {
+        else if (hotKey === 'ArrowDown') {
             direction = 'down';
         }
-        else if (randomNumber > 0.80) {
+        else if (hotKey === 'ArrowLeft') {
             direction = 'left';
         }
 
         if (direction) {
             this.props.move(this.props.id, direction, 5);
+
+            this.props.clearHotKey();
         }
     }
 
@@ -80,8 +86,9 @@ const mapStateToProps = createStructuredSelector({
 });
 
 const mapDispatchToProps = {
+    clearHotKey,
     move,
     attrition,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Sprite);
+export default connect(mapStateToProps, mapDispatchToProps)(SpritePlayer);
