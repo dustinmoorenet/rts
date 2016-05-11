@@ -21,6 +21,7 @@ global.store.dispatch(set({
         r: 20,
         cx: 40,
         cy: 40,
+        metabolismRate: 0.01,
     },
     2: {
         type: 'sprite',
@@ -28,6 +29,7 @@ global.store.dispatch(set({
         r: 50,
         cx: 100,
         cy: 100,
+        metabolismRate: 0.04,
     },
 }));
 

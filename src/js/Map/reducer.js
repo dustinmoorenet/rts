@@ -1,3 +1,4 @@
+import {combineReducers} from 'redux';
 import reduceReducers from 'reduce-reducers';
 
 import {
@@ -15,9 +16,18 @@ export function handleSetSize(state, action = {}) {
     return state;
 }
 
-function reducer(state = {width: 0, height: 0}) {
+function width(state = 0) {
     return state;
 }
+
+function height(state = 0) {
+    return state;
+}
+
+const reducer = combineReducers({
+    width,
+    height,
+});
 
 export default reduceReducers(
     reducer,

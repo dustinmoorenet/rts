@@ -13,6 +13,7 @@ export class Sprite extends Component {
         r: PropTypes.number.isRequired,
         cx: PropTypes.number.isRequired,
         cy: PropTypes.number.isRequired,
+        metabolismRate: PropTypes.number.isRequired,
         hotKey: PropTypes.string.isRequired,
         time: PropTypes.number.isRequired,
         lastTime: PropTypes.number.isRequired,
@@ -57,7 +58,7 @@ export class Sprite extends Component {
     }
 
     attrition(time, lastTime) {
-        this.props.attrition(this.props.id, ((time - lastTime) / 1000) * 0.01);
+        this.props.attrition(this.props.id, ((time - lastTime) / 1000) * this.props.metabolismRate);
     }
 
     render() {

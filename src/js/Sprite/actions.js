@@ -5,15 +5,19 @@ import {
 
 export function move(id, direction, amount) {
     return (dispatch, getState) => {
-        const unit = getState().population[id];
+        const state = getState();
+        const map = state.map;
+        const unit = state.population[id];
 
         if (!unit) {
             return;
         }
 
         const {
+            r,
             cx,
             cy,
+            metabolismRate,
         } = unit;
 
         let moreX = 0;
@@ -35,15 +39,31 @@ export function move(id, direction, amount) {
         default:
         }
 
-        if (moreX || moreY) {
+        let newCX = cx + moreX;
+        let newCY = cy + moreY;
+        if (newCX < (0 + r)) {
+            newCX = 0 + r;
+        }
+        else if (newCX > (map.width - r)) {
+            newCX = map.width - r;
+        }
+
+        if (newCY < (0 + r)) {
+            newCY = 0 + r;
+        }
+        else if (newCY > (map.height - r)) {
+            newCY = map.height - r;
+        }
+
+        if (cx !== newCX || cy !== newCY) {
             dispatch(updateUnit(id,
                 {
-                    cx: cx + moreX,
-                    cy: cy + moreY,
+                    cx: newCX,
+                    cy: newCY,
                 }
             ));
 
-            dispatch(attrition(id, (Math.abs(moreX) + Math.abs(moreY)) * 0.01));
+            dispatch(attrition(id, (Math.abs(cx - newCX) + Math.abs(cy - newCY)) * (metabolismRate * 0.5)));
         }
     };
 }
