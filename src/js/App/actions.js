@@ -1,6 +1,8 @@
 const BASE = 'app';
 export const SET_HOT_KEY = `${BASE}/SET_HOT_KEY`;
 
+import {setSize} from 'js/Map/actions';
+
 export function setHotKey(hotKey = null) {
     return {
         type: SET_HOT_KEY,
@@ -11,6 +13,18 @@ export function setHotKey(hotKey = null) {
 export function listenToKeys() {
     return (dispatch) => {
         document.addEventListener('keydown', (event) => dispatch(onKeyPress(event)));
+    };
+}
+
+export function listenToWindowSize() {
+    return (dispatch) => {
+        function onResize() {
+            dispatch(setSize({width: window.innerWidth, height: window.innerHeight}));
+        }
+
+        window.addEventListener('resize', onResize);
+
+        onResize();
     };
 }
 

@@ -14,10 +14,12 @@ const unitTypes = {
 export function Map(props) {
     const {
         population,
+        width,
+        height,
     } = props;
 
     return (
-        <svg width="400" height="400">
+        <svg width={width} height={height}>
             {_.map(population, (unit) => {
                 const Type = unitTypes[unit.type];
 
@@ -29,10 +31,14 @@ export function Map(props) {
 
 Map.propTypes = {
     population: PropTypes.object.isRequired,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
     population: (state) => state.population,
+    width: (state) => state.map.width,
+    height: (state) => state.map.height,
 });
 
 export default connect(mapStateToProps)(Map);
