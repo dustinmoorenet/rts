@@ -11,8 +11,8 @@ export class Sprite extends Component {
     static propTypes = {
         id: PropTypes.number.isRequired,
         r: PropTypes.number.isRequired,
-        cx: PropTypes.number.isRequired,
-        cy: PropTypes.number.isRequired,
+        x: PropTypes.number.isRequired,
+        y: PropTypes.number.isRequired,
         metabolismRate: PropTypes.number.isRequired,
         hotKey: PropTypes.string.isRequired,
         time: PropTypes.number.isRequired,
@@ -27,33 +27,7 @@ export class Sprite extends Component {
         }
 
         if (this.props.time !== nextProps.time) {
-            this.move();
-        }
-
-        if (this.props.time !== nextProps.time) {
             this.attrition(nextProps.time, nextProps.lastTime);
-        }
-    }
-
-    move() {
-        const randomNumber = Math.random();
-        let direction;
-
-        if (randomNumber > 0.95) {
-            direction = 'up';
-        }
-        else if (randomNumber > 0.90) {
-            direction = 'right';
-        }
-        else if (randomNumber > 0.85) {
-            direction = 'down';
-        }
-        else if (randomNumber > 0.80) {
-            direction = 'left';
-        }
-
-        if (direction) {
-            this.props.move(this.props.id, direction, 5);
         }
     }
 
@@ -64,12 +38,12 @@ export class Sprite extends Component {
     render() {
         const {
             r,
-            cx,
-            cy,
+            x,
+            y,
         } = this.props;
 
         return (
-            <circle cx={cx} cy={cy} r={r} />
+            <circle cx={x} cy={y} r={r} />
         );
     }
 }

@@ -1,3 +1,5 @@
+import uniqueId from 'lodash/uniqueId';
+
 const BASE = 'population';
 export const SET = `${BASE}/SET`;
 export const ADD_UNIT = `${BASE}/ADD_UNIT`;
@@ -32,5 +34,23 @@ export function removeUnit(id) {
     return {
         type: REMOVE_UNIT,
         payload: id,
+    };
+}
+
+export function addUnitAtMouse() {
+    return (dispatch, getState) => {
+        const state = getState();
+        const mousePosition = state.app.mousePosition;
+
+        dispatch(addUnit({
+            type: 'sprite',
+            id: Number(uniqueId()),
+            r: 20,
+            x: mousePosition.x,
+            y: mousePosition.y,
+            walkRate: 5,
+            metabolismRate: 1,
+            tasks: [],
+        }));
     };
 }
