@@ -3,7 +3,7 @@ import {
     removeUnit,
 } from 'js/Population/actions';
 
-export function move(id, direction, amount) {
+export function move(id, {deltaX, deltaY}) {
     return (dispatch, getState) => {
         const state = getState();
         const map = state.map;
@@ -20,27 +20,8 @@ export function move(id, direction, amount) {
             metabolismRate,
         } = unit;
 
-        let moreX = 0;
-        let moreY = 0;
-
-        switch (direction) {
-        case 'up':
-            moreY = -amount;
-            break;
-        case 'right':
-            moreX = amount;
-            break;
-        case 'down':
-            moreY = amount;
-            break;
-        case 'left':
-            moreX = -amount;
-            break;
-        default:
-        }
-
-        let newCX = cx + moreX;
-        let newCY = cy + moreY;
+        let newCX = cx + deltaX;
+        let newCY = cy + deltaY;
         if (newCX < (0 + r)) {
             newCX = 0 + r;
         }
@@ -90,5 +71,84 @@ export function attrition(id, amount) {
         if (radius <= 0) {
             dispatch(removeUnit(id));
         }
+    };
+}
+
+export function goTo(unit, position) {
+    return (dispatch, getState) => {
+        const timeMachine = getState().timeMachine;
+        const deltaTime = (timeMachine.time - timeMachine.lastTime) / 1000;
+
+        const {
+            x,
+            y,
+            walkRate,
+        } = unit;
+
+        const aTotalDistance = position.x - x;
+        const bTotalDistance = position.y - y;
+        const cTotalDistance = Math.sqrt(Math.pow(aTotalDistance, 2) + Math.pow(bTotalDistance, 2));
+        const totalTravelTime = cTotalDistance / walkRate;
+        const percentDone = deltaTime / totalTravelTime;
+        const aDistance = aTotalDistance * percentDone;
+        const bDistance = bTotalDistance * percentDone;
+
+        if (percentDone < 1) {
+            return dispatch(updateUnit(unit.id, {
+                x: x + aDistance,
+                y: y + bDistance,
+                tasks: [
+                    {
+                        type: 'goTo',
+                        x: position.x,
+                        y: position.y,
+                    },
+                    ...unit.tasks,
+                ],
+            }));
+        }
+
+        return dispatch(updateUnit(unit.id, {
+            x: position.x,
+            y: position.y,
+        }));
+    };
+}
+
+const TASKS = {
+    goTo,
+};
+
+export function shiftTask(id) {
+    return (dispatch, getState) => {
+        const unit = getState().population[id];
+
+        if (!unit) {
+            return null;
+        }
+
+        const task = unit.tasks.shift();
+
+        if (!task) {
+            return null;
+        }
+
+        dispatch(updateUnit(id, {
+            tasks: [...unit.tasks],
+        }));
+
+        return task;
+    };
+}
+
+export function handleTask(id) {
+    return (dispatch) => {
+        const task = dispatch(shiftTask(id));
+
+        if (task) {
+            return dispatch(TASKS[task.type](id, task.payload));
+        }
+
+        return null;
     };
 }

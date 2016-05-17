@@ -16,12 +16,16 @@ global.store.dispatch(listenToKeys());
 global.store.dispatch(listenToWindowSize());
 global.store.dispatch(set({
     1: {
-        type: 'spritePlayer',
+        type: 'sprite',
         id: 1,
         r: 20,
         cx: 40,
         cy: 40,
+        walkRate: 5,
         metabolismRate: 0.01,
+        tasks: [
+            {type: 'goTo', payload: {x: 200, y: 80}},
+        ],
     },
     2: {
         type: 'sprite',
@@ -29,7 +33,11 @@ global.store.dispatch(set({
         r: 50,
         cx: 100,
         cy: 100,
+        walkRate: 10,
         metabolismRate: 0.04,
+        tasks: [
+            {type: 'goTo', payload: {x: 200, y: 80}},
+        ],
     },
 }));
 
