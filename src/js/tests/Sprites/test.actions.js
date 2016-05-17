@@ -1,4 +1,5 @@
 import expect from 'expect';
+import fp from 'lodash/fp';
 
 import spyStore from 'js/tests/utils/spyStore';
 import {
@@ -129,6 +130,51 @@ describe('Sprite/actions', () => {
                     type: 'population/UPDATE_UNIT',
                 },
             ]);
+        });
+
+        it('should have no tasks if goTo complete journey (exact)', () => {
+            const {dispatch, getState, getActions} = spyStore(initialState);
+            const unit = getState().population[1];
+
+            dispatch(goTo(unit, {x: 104, y: 103}));
+
+            expect(getActions()).toEqual([
+                {
+                    payload: {
+                        id: 1,
+                        props: {
+                            x: 104,
+                            y: 103,
+                        },
+                    },
+                    type: 'population/UPDATE_UNIT',
+                },
+            ]);
+
+            expect(getState().population[1].tasks).toEqual([]);
+        });
+
+        it('should have no tasks if goTo complete journey (overshot)', () => {
+            const state = fp.set('population.1.walkRate', 20, initialState);
+            const {dispatch, getState, getActions} = spyStore(state);
+            const unit = getState().population[1];
+
+            dispatch(goTo(unit, {x: 104, y: 103}));
+
+            expect(getActions()).toEqual([
+                {
+                    payload: {
+                        id: 1,
+                        props: {
+                            x: 104,
+                            y: 103,
+                        },
+                    },
+                    type: 'population/UPDATE_UNIT',
+                },
+            ]);
+
+            expect(getState().population[1].tasks).toEqual([]);
         });
     });
 });
