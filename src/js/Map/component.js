@@ -22,7 +22,7 @@ export class Map extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if (!this.props.mouseKey && this.props.mouseKey !== nextProps.mouseKey) {
+        if (nextProps.mouseKey === 'LMB' && this.props.mouseKey !== nextProps.mouseKey) {
             this.props.addUnitAtMouse();
         }
     }

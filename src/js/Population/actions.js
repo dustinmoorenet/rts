@@ -49,8 +49,14 @@ export function addUnitAtMouse() {
             x: mousePosition.x,
             y: mousePosition.y,
             walkRate: 5,
-            metabolismRate: 1,
-            tasks: [],
+            metabolismRate: 0.2,
+            tasks: [{
+                type: 'goTo',
+                payload: {
+                    x: 500,
+                    y: 500,
+                },
+            }],
         }));
     };
 }

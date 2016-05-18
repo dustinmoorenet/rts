@@ -5,6 +5,7 @@ import {createStructuredSelector} from 'reselect';
 import {
     move,
     attrition,
+    handleTask,
 } from './actions';
 
 export class Sprite extends Component {
@@ -19,6 +20,7 @@ export class Sprite extends Component {
         lastTime: PropTypes.number.isRequired,
         move: PropTypes.func.isRequired,
         attrition: PropTypes.func.isRequired,
+        handleTask: PropTypes.func.isRequired,
     }
 
     componentWillReceiveProps(nextProps) {
@@ -28,6 +30,7 @@ export class Sprite extends Component {
 
         if (this.props.time !== nextProps.time) {
             this.attrition(nextProps.time, nextProps.lastTime);
+            this.props.handleTask(this.props.id);
         }
     }
 
@@ -57,6 +60,7 @@ const mapStateToProps = createStructuredSelector({
 const mapDispatchToProps = {
     move,
     attrition,
+    handleTask,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Sprite);

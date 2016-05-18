@@ -74,8 +74,15 @@ export function attrition(id, amount) {
     };
 }
 
-export function goTo(unit, position) {
+export function goTo(id, position) {
     return (dispatch, getState) => {
+        const state = getState();
+        const unit = state.population[id];
+
+        if (!unit) {
+            return null;
+        }
+
         const timeMachine = getState().timeMachine;
         const deltaTime = (timeMachine.time - timeMachine.lastTime) / 1000;
 
@@ -100,8 +107,10 @@ export function goTo(unit, position) {
                 tasks: [
                     {
                         type: 'goTo',
-                        x: position.x,
-                        y: position.y,
+                        payload: {
+                            x: position.x,
+                            y: position.y,
+                        },
                     },
                     ...unit.tasks,
                 ],

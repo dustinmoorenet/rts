@@ -37,6 +37,7 @@ export function listenToMouse() {
         window.addEventListener('mousedown', (event) => dispatch(onMouseDown(event)));
         window.addEventListener('mouseup', (event) => dispatch(onMouseUp(event)));
         window.addEventListener('mousemove', (event) => dispatch(onMouseMove(event)));
+        window.addEventListener('contextmenu', (event) => onContextMenu(event));
     };
 }
 
@@ -126,4 +127,8 @@ export function onMouseMove(event) {
     return (dispatch) => {
         dispatch(setMousePosition({x: event.pageX, y: event.pageY}));
     };
+}
+
+export function onContextMenu(event) {
+    event.preventDefault();
 }
