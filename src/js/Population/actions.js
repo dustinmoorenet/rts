@@ -1,4 +1,5 @@
 import uniqueId from 'lodash/uniqueId';
+import THREE from 'three';
 
 const BASE = 'population';
 export const SET = `${BASE}/SET`;
@@ -37,26 +38,68 @@ export function removeUnit(id) {
     };
 }
 
-export function addUnitAtMouse() {
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector3();
+const direction = new THREE.Vector3();
+
+export function findItemUnderMouse(scene, camera) {
     return (dispatch, getState) => {
         const state = getState();
-        const mousePosition = state.app.mousePosition;
+        const {
+            x: mouseX,
+            y: mouseY,
+        } = state.app.mousePosition;
+        const {
+            width,
+            height,
+        } = state.map;
 
-        dispatch(addUnit({
-            type: 'sprite',
-            id: Number(uniqueId()),
-            r: 20,
-            x: mousePosition.x,
-            y: mousePosition.y,
-            walkRate: 5,
-            metabolismRate: 0.2,
-            tasks: [{
-                type: 'goTo',
-                payload: {
-                    x: 500,
-                    y: 500,
-                },
-            }],
-        }));
+        mouse.x = (mouseX / width) * 2 - 1;
+        mouse.y = - (mouseY / height) * 2 + 1;
+        mouse.z = -1;
+
+        mouse.unproject(camera);
+
+        direction.set(0, 0, -1).transformDirection(camera.matrixWorld);
+
+        raycaster.set(mouse, direction);
+
+        const intersects = raycaster.intersectObjects(scene.children);
+
+        if (intersects.length > 0) {
+            console.log('object', intersects[0].object);
+            console.log('point', intersects[0].point);
+
+            return intersects[0].point;
+        }
+
+        return null;
+    };
+}
+
+export function addUnitAtMouse(scene, camera) {
+    return (dispatch) => {
+        const point = dispatch(findItemUnderMouse(scene, camera));
+
+        if (point) {
+            dispatch(addUnit({
+                type: 'sprite',
+                id: Number(uniqueId()),
+                r: 20,
+                x: point.x,
+                y: 0,
+                z: point.z,
+                walkRate: 5,
+                metabolismRate: 0.2,
+                tasks: [{
+                    type: 'goTo',
+                    payload: {
+                        x: 500,
+                        y: 0,
+                        z: 500
+                    },
+                }],
+            }));
+        }
     };
 }

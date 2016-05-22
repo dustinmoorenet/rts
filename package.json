@@ -50,6 +50,7 @@
     "redux": "3.5.2",
     "redux-thunk": "2.0.1",
     "reselect": "2.5.1",
+    "three": "^0.76.1",
     "watch": "0.18.0",
     "webpack": "1.13.0"
   },

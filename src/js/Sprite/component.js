@@ -1,6 +1,7 @@
 import React, {Component, PropTypes} from 'react';
 import {connect} from 'react-redux';
 import {createStructuredSelector} from 'reselect';
+import THREE from 'three';
 
 import {
     move,
@@ -14,6 +15,7 @@ export class Sprite extends Component {
         r: PropTypes.number.isRequired,
         x: PropTypes.number.isRequired,
         y: PropTypes.number.isRequired,
+        z: PropTypes.number.isRequired,
         metabolismRate: PropTypes.number.isRequired,
         hotKey: PropTypes.string.isRequired,
         time: PropTypes.number.isRequired,
@@ -21,6 +23,12 @@ export class Sprite extends Component {
         move: PropTypes.func.isRequired,
         attrition: PropTypes.func.isRequired,
         handleTask: PropTypes.func.isRequired,
+    }
+
+    constructor(props, context) {
+        super(props, context);
+
+        this.position = new THREE.Vector3(0, 0, 0);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -43,14 +51,31 @@ export class Sprite extends Component {
             r,
             x,
             y,
+            z,
         } = this.props;
 
+        this.position.setY(r / 2);
+        this.position.setX(x);
+        this.position.setZ(z);
+
         return (
-            <circle cx={x} cy={y} r={r} />
+            <mesh
+                position={this.position}
+            >
+                <boxGeometry
+                    width={r}
+                    height={r}
+                    depth={r}
+                />
+                <meshBasicMaterial
+                    color={0x0000ff}
+                />
+            </mesh>
         );
     }
 }
 
+// browser.js:40 Uncaught Invariant Violation: Could not find "store" in either the context or props of "Connect(Sprite)". Either wrap the root component in a <Provider>, or explicitly pass "store" as a prop to "Connect(Sprite)".
 const mapStateToProps = createStructuredSelector({
     hotKey: (state) => state.app.hotKey,
     time: (state) => state.timeMachine.time,
