@@ -39,7 +39,7 @@ export function removeUnit(id) {
 }
 
 const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector3();
+const mouse = new THREE.Vector2();
 const direction = new THREE.Vector3();
 
 export function findItemUnderMouse(scene, camera) {
@@ -56,20 +56,18 @@ export function findItemUnderMouse(scene, camera) {
 
         mouse.x = (mouseX / width) * 2 - 1;
         mouse.y = - (mouseY / height) * 2 + 1;
-        mouse.z = -1;
+        // mouse.z = -1;
 
-        mouse.unproject(camera);
+        // mouse.unproject(camera);
 
-        direction.set(0, 0, -1).transformDirection(camera.matrixWorld);
+        // direction.set(0, 0, -1).transformDirection(camera.matrixWorld);
 
-        raycaster.set(mouse, direction);
+        raycaster.setFromCamera(mouse, camera);
 
         const intersects = raycaster.intersectObjects(scene.children);
 
+console.log('hey did we interset', intersects);
         if (intersects.length > 0) {
-            console.log('object', intersects[0].object);
-            console.log('point', intersects[0].point);
-
             return intersects[0].point;
         }
 
@@ -96,7 +94,7 @@ export function addUnitAtMouse(scene, camera) {
                     payload: {
                         x: 500,
                         y: 0,
-                        z: 500
+                        z: 500,
                     },
                 }],
             }));

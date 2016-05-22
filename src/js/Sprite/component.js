@@ -61,13 +61,15 @@ export class Sprite extends Component {
         return (
             <mesh
                 position={this.position}
+                receiveShadow
+                castShadow
             >
                 <boxGeometry
                     width={r}
                     height={r}
                     depth={r}
                 />
-                <meshBasicMaterial
+                <meshLambertMaterial
                     color={0x0000ff}
                 />
             </mesh>
