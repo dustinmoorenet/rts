@@ -85,7 +85,7 @@ export function addUnitAtMouse(scene, camera) {
                 id: Number(uniqueId()),
                 r: 20,
                 x: point.x,
-                y: 0,
+                y: 50,
                 z: point.z,
                 walkRate: 5,
                 metabolismRate: 0.2,

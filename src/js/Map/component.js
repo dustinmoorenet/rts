@@ -36,9 +36,17 @@ export class Map extends Component {
             height,
         } = this.props;
 
+        this.zoom = 1;
         this.renderer = new THREE.WebGLRenderer({antialias: true});
-        this.camera = new THREE.OrthographicCamera(width / - 2, width / 2, height / 2, height / - 2, 1, 10000);
-        const cameraOffset = new THREE.Vector3(-500, 500, -500);
+        this.camera = new THREE.OrthographicCamera(
+            (width / - 2) * this.zoom,
+            (width / 2) * this.zoom,
+            (height / 2) * this.zoom,
+            (height / - 2) * this.zoom,
+            1,
+            10000
+        );
+        const cameraOffset = new THREE.Vector3(-2000, 2000, -2000);
         this.scene = new THREE.Scene();
         this.floor = new THREE.Mesh(
             new THREE.BoxGeometry(2000, 1, 2000),
@@ -123,6 +131,23 @@ export class Map extends Component {
             const removedItems = difference(oldKeys, newKeys);
             const addedItems = difference(newKeys, oldKeys);
             console.log('population change', addedItems, removedItems, this.props.population, nextProps.population);
+
+            addedItems.forEach((itemKey) => {
+                const item = nextProps.population[itemKey];
+
+                var itemMesh = new THREE.Mesh(
+                    new THREE.BoxGeometry(50, 50, 50),
+                    new THREE.MeshLambertMaterial({color: 0x0000ff})
+                );
+
+                itemMesh.position.set(item.x, item.y, item.z);
+
+                itemMesh.castShadow = true;
+
+                this.group.add(itemMesh);
+            });
+
+            this.renderer.render(this.scene, this.camera);
         }
     }
 
@@ -136,80 +161,6 @@ export class Map extends Component {
         );
     }
 }
-
-// <React3
-//     mainCamera="camera"
-//     antialias
-//     width={width}
-//     height={height}
-//     shadowMapEnabled
-//     pixelRatio={window.devicePixelRatio}
-// >
-//     <scene ref="scene">
-//         <orthographicCamera
-//             ref="camera"
-//             name="camera"
-//             left={width / - 2}
-//             right={width / 2}
-//             top={height / 2}
-//             bottom={height / - 2}
-//             near={0.1}
-//             far={10000}
-//             position={this.cameraPosition}
-//             lookAt={this.lookAt}
-//         />
-//         <ambientLight
-//             color={0x666666}
-//         />
-//         {/* <pointLight
-//             color={0xffffff}
-//             intensity={2}
-//             position={this.lightPosition}
-//             distance={0}
-//             castShadow
-//
-//             shadowMapWidth={10000}
-//             shadowMapHeight={10000}
-//         /> */}
-//         <directionalLight
-//             color={0xffffff}
-//             position={this.lightPosition}
-//             castShadow
-//         />
-//         <mesh
-//             position={this.groundPosition}
-//             receiveShadow
-//         >
-//             <boxGeometry
-//                 width={1000}
-//                 height={10}
-//                 depth={1000}
-//             />
-//             <meshLambertMaterial
-//                 color={0x00ff00}
-//             />
-//         </mesh>
-//         <mesh
-//             position={this.housePosition}
-//             receiveShadow
-//             castShadow
-//         >
-//             <boxGeometry
-//                 width={100}
-//                 height={100}
-//                 depth={100}
-//             />
-//             <meshLambertMaterial
-//                 color={0xff00ff}
-//             />
-//         </mesh>
-//         {_.map(population, (unit) => {
-//             const Type = unitTypes[unit.type];
-//
-//             return <Type key={unit.id} store={global.store} {...unit} />;
-//         })}
-//     </scene>
-// </React3>
 
 const mapStateToProps = createStructuredSelector({
     population: (state) => state.population,
