@@ -69,6 +69,7 @@ export function update() {
 
         if (!stopBlock) {
             requestAnimationFrame(() => dispatch(update()));
+            // setTimeout(() => dispatch(update()), 2000);
         }
     };
 }

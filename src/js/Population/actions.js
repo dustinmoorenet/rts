@@ -40,7 +40,6 @@ export function removeUnit(id) {
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-const direction = new THREE.Vector3();
 
 export function findItemUnderMouse(scene, camera) {
     return (dispatch, getState) => {
@@ -56,17 +55,11 @@ export function findItemUnderMouse(scene, camera) {
 
         mouse.x = (mouseX / width) * 2 - 1;
         mouse.y = - (mouseY / height) * 2 + 1;
-        // mouse.z = -1;
-
-        // mouse.unproject(camera);
-
-        // direction.set(0, 0, -1).transformDirection(camera.matrixWorld);
 
         raycaster.setFromCamera(mouse, camera);
 
         const intersects = raycaster.intersectObjects(scene.children);
 
-console.log('hey did we interset', intersects);
         if (intersects.length > 0) {
             return intersects[0].point;
         }
@@ -82,13 +75,13 @@ export function addUnitAtMouse(scene, camera) {
         if (point) {
             dispatch(addUnit({
                 type: 'sprite',
-                id: Number(uniqueId()),
-                r: 20,
+                id: uniqueId(),
+                scale: 1,
                 x: point.x,
                 y: 50,
                 z: point.z,
                 walkRate: 5,
-                metabolismRate: 0.2,
+                metabolismRate: 0.05,
                 tasks: [{
                     type: 'goTo',
                     payload: {

@@ -1,19 +1,13 @@
 import React, {Component, PropTypes} from 'react';
-import React3 from 'react-three-renderer';
 import THREE from 'three';
 import {connect} from 'react-redux';
 import {createStructuredSelector} from 'reselect';
 import difference from 'lodash/difference';
+import values from 'lodash/values';
 
-import Sprite from 'js/Sprite/component';
-import SpritePlayer from 'js/SpritePlayer/component';
 import {addUnitAtMouse} from 'js/Population/actions';
 import {setCamera} from './actions';
-
-const unitTypes = {
-    sprite: Sprite,
-    spritePlayer: SpritePlayer,
-};
+import {onTime} from 'js/Sprite/actions';
 
 export class Map extends Component {
     static propTypes = {
@@ -26,8 +20,10 @@ export class Map extends Component {
             z: PropTypes.number.isRequired,
         }),
         mouseKey: PropTypes.string.isRequired,
+        time: PropTypes.number.isRequired,
         addUnitAtMouse: PropTypes.func.isRequired,
         setCamera: PropTypes.func.isRequired,
+        onTime: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -36,6 +32,7 @@ export class Map extends Component {
             height,
         } = this.props;
 
+        this.units = {};
         this.zoom = 1;
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.camera = new THREE.OrthographicCamera(
@@ -126,28 +123,63 @@ export class Map extends Component {
         }
 
         if (nextProps.population !== this.props.population) {
-            const newKeys = Object.keys(nextProps.population);
-            const oldKeys = Object.keys(this.props.population);
-            const removedItems = difference(oldKeys, newKeys);
-            const addedItems = difference(newKeys, oldKeys);
-            console.log('population change', addedItems, removedItems, this.props.population, nextProps.population);
+            const modifiedUnits = difference(
+                values(nextProps.population),
+                values(this.props.population)
+            );
+            const removedUnits = difference(
+                Object.keys(this.props.population),
+                Object.keys(nextProps.population)
+            );
+            const updatedUnits = [];
 
-            addedItems.forEach((itemKey) => {
-                const item = nextProps.population[itemKey];
+            modifiedUnits.forEach((unit) => {
+                if (!this.props.population[unit.id]) {
+                    var unitMesh = new THREE.Mesh(
+                        new THREE.BoxGeometry(30, 30, 30),
+                        new THREE.MeshLambertMaterial({color: 0x0000ff})
+                    );
 
-                var itemMesh = new THREE.Mesh(
-                    new THREE.BoxGeometry(50, 50, 50),
-                    new THREE.MeshLambertMaterial({color: 0x0000ff})
-                );
+                    unitMesh.position.set(unit.x, unit.y, unit.z);
 
-                itemMesh.position.set(item.x, item.y, item.z);
+                    unitMesh.castShadow = true;
 
-                itemMesh.castShadow = true;
-
-                this.group.add(itemMesh);
+                    this.group.add(unitMesh);
+                    this.units[unit.id] = unitMesh;
+                }
+                else {
+                    updatedUnits.push(unit.id);
+                }
             });
 
-            this.renderer.render(this.scene, this.camera);
+            removedUnits.forEach((id) => {
+                if (this.units[id]) {
+                    this.group.remove(this.units[id]);
+
+                    delete this.units[id];
+                }
+            });
+
+            updatedUnits.forEach((id) => {
+                if (this.units[id]) {
+                    const unit = nextProps.population[id];
+
+                    this.units[id].position.set(unit.x, unit.y, unit.z);
+                    this.units[id].scale.set(unit.scale, unit.scale, unit.scale);
+                }
+            });
+
+            if (modifiedUnits.length || removedUnits.length) {
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+
+        if (this.props.time !== nextProps.time) {
+            const delta = nextProps.time - this.props.time;
+
+            Object.keys(this.props.population).forEach((id) => {
+                this.props.onTime(id, delta);
+            });
         }
     }
 
@@ -168,11 +200,13 @@ const mapStateToProps = createStructuredSelector({
     height: (state) => state.map.height,
     camera: (state) => state.map.camera,
     mouseKey: (state) => state.app.mouseKey,
+    time: (state) => state.timeMachine.time,
 });
 
 const mapDispatchToProps = {
     addUnitAtMouse,
     setCamera,
+    onTime,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);

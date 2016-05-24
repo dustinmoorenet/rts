@@ -31,21 +31,6 @@ export class Sprite extends Component {
         this.position = new THREE.Vector3(0, 0, 0);
     }
 
-    componentWillReceiveProps(nextProps) {
-        if (nextProps.r <= 0) {
-            return;
-        }
-
-        if (this.props.time !== nextProps.time) {
-            this.attrition(nextProps.time, nextProps.lastTime);
-            this.props.handleTask(this.props.id);
-        }
-    }
-
-    attrition(time, lastTime) {
-        this.props.attrition(this.props.id, ((time - lastTime) / 1000) * this.props.metabolismRate);
-    }
-
     render() {
         const {
             r,
