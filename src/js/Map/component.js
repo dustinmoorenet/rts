@@ -33,13 +33,13 @@ export class Map extends Component {
         } = this.props;
 
         this.units = {};
-        this.zoom = 1;
+        this.zoom = 0.5;
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.camera = new THREE.OrthographicCamera(
-            (width / - 2) * this.zoom,
-            (width / 2) * this.zoom,
-            (height / 2) * this.zoom,
-            (height / - 2) * this.zoom,
+            (width / - 2) / this.zoom,
+            (width / 2) / this.zoom,
+            (height / 2) / this.zoom,
+            (height / - 2) / this.zoom,
             1,
             10000
         );
@@ -63,6 +63,7 @@ export class Map extends Component {
             new THREE.MeshLambertMaterial({color: 0xff0000})
         );
 
+        this.createMan();
 
         this.renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         this.renderer.shadowMap.enabled = true;
@@ -71,7 +72,7 @@ export class Map extends Component {
         this.renderer.gammaOutput = true;
 
         this.camera.position.copy(cameraOffset.clone().add(housePosition));
-        this.camera.lookAt(housePosition);
+        this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         directionalLight.position.copy(lightPosition);
         directionalLight.target = this.floor;
@@ -105,6 +106,26 @@ export class Map extends Component {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
         this.renderer.render(this.scene, this.camera);
+    }
+
+    createMan() {
+        const loader = new THREE.JSONLoader();
+
+        loader.load(
+            'assets/man/man.json',
+            (geometry, materials) => {
+                console.log('object?', geometry, materials);
+                const material = new THREE.MultiMaterial(materials);
+                const object = new THREE.Mesh(geometry, material);
+
+                object.position.set(0, 0, 0);
+                object.scale.set(10, 10, 10);
+
+                this.scene.add(object);
+
+                setTimeout(() => this.renderer.render(this.scene, this.camera), 1000);
+            }
+        );
     }
 
     componentWillReceiveProps(nextProps) {
