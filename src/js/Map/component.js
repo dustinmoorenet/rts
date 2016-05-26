@@ -64,6 +64,7 @@ export class Map extends Component {
         );
 
         this.createMan();
+        this.createHouse();
 
         this.renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         this.renderer.shadowMap.enabled = true;
@@ -114,12 +115,32 @@ export class Map extends Component {
         loader.load(
             'assets/man/man.json',
             (geometry, materials) => {
-                console.log('object?', geometry, materials);
                 const material = new THREE.MultiMaterial(materials);
                 const object = new THREE.Mesh(geometry, material);
 
-                object.position.set(0, 0, 0);
+                object.position.set(300, 0, 300);
                 object.scale.set(10, 10, 10);
+                object.rotation.set(0, Math.PI, 0);
+
+                this.scene.add(object);
+
+                setTimeout(() => this.renderer.render(this.scene, this.camera), 1000);
+            }
+        );
+    }
+
+    createHouse() {
+        const loader = new THREE.JSONLoader();
+
+        loader.load(
+            'assets/house/house.json',
+            (geometry, materials) => {
+                const material = new THREE.MultiMaterial(materials);
+                const object = new THREE.Mesh(geometry, material);
+
+                object.position.set(550, 0, 550);
+                object.scale.set(10, 10, 10);
+                object.rotation.set(0, Math.PI, 0);
 
                 this.scene.add(object);
 
