@@ -8,6 +8,7 @@ import values from 'lodash/values';
 import {addUnitAtMouse} from 'js/Population/actions';
 import {setCamera} from './actions';
 import {onTime} from 'js/Sprite/actions';
+import assetsManifest from 'assets/manifest';
 
 export class Map extends Component {
     static propTypes = {
@@ -43,28 +44,30 @@ export class Map extends Component {
             1,
             10000
         );
-        const cameraOffset = new THREE.Vector3(-2000, 2000, -2000);
         this.scene = new THREE.Scene();
         this.floor = new THREE.Mesh(
             new THREE.BoxGeometry(2000, 1, 2000),
             new THREE.MeshLambertMaterial({color: 0x00ff00})
         );
         this.group = new THREE.Group();
-        var house = new THREE.Mesh(
-            new THREE.BoxGeometry(100, 100, 100),
-            new THREE.MeshLambertMaterial({color: 0x4080ff})
-        );
-        var housePosition = new THREE.Vector3(500, 100, 1000);
         var ambient = new THREE.AmbientLight(0xffffff, 0.1);
         var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         var lightPosition = new THREE.Vector3(1000, 1500, 500);
-        var lightMarker = new THREE.Mesh(
-            new THREE.BoxGeometry(10, 10, 10),
-            new THREE.MeshLambertMaterial({color: 0xff0000})
-        );
 
-        this.createMan();
-        this.createHouse();
+        this.createAssets()
+            .then((objects) => {
+                this.objects = objects;
+
+                this.man = this.objects.man.clone();
+                this.man.position.set(300, 0, 300);
+                this.scene.add(this.man);
+
+                this.house = this.objects.house.clone();
+                this.house.position.set(550, 0, 550);
+                this.scene.add(this.house);
+
+                setTimeout(() => this.renderer.render(this.scene, this.camera), 250);
+            });
 
         this.renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         this.renderer.shadowMap.enabled = true;
@@ -72,7 +75,7 @@ export class Map extends Component {
         this.renderer.gammaInput = true;
         this.renderer.gammaOutput = true;
 
-        this.camera.position.copy(cameraOffset.clone().add(housePosition));
+        this.camera.position.set(-2000, 2000, -2000);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         directionalLight.position.copy(lightPosition);
@@ -91,62 +94,15 @@ export class Map extends Component {
         this.floor.receiveShadow = true;
         this.floor.position.set(1000, -0.5, 1000);
 
-        house.castShadow = true;
-        house.position.copy(housePosition);
-
-        lightMarker.position.copy(lightPosition);
-
         this.scene.add(this.camera);
         this.scene.add(this.floor);
-        this.scene.add(house);
         this.scene.add(ambient);
         this.scene.add(directionalLight);
-        this.scene.add(lightMarker);
         this.scene.add(this.group);
         this.refs.holder.appendChild(this.renderer.domElement);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
         this.renderer.render(this.scene, this.camera);
-    }
-
-    createMan() {
-        const loader = new THREE.JSONLoader();
-
-        loader.load(
-            'assets/man/man.json',
-            (geometry, materials) => {
-                const material = new THREE.MultiMaterial(materials);
-                const object = new THREE.Mesh(geometry, material);
-
-                object.position.set(300, 0, 300);
-                object.scale.set(10, 10, 10);
-                object.rotation.set(0, Math.PI, 0);
-
-                this.scene.add(object);
-
-                setTimeout(() => this.renderer.render(this.scene, this.camera), 1000);
-            }
-        );
-    }
-
-    createHouse() {
-        const loader = new THREE.JSONLoader();
-
-        loader.load(
-            'assets/house/house.json',
-            (geometry, materials) => {
-                const material = new THREE.MultiMaterial(materials);
-                const object = new THREE.Mesh(geometry, material);
-
-                object.position.set(550, 0, 550);
-                object.scale.set(10, 10, 10);
-                object.rotation.set(0, Math.PI, 0);
-
-                this.scene.add(object);
-
-                setTimeout(() => this.renderer.render(this.scene, this.camera), 1000);
-            }
-        );
     }
 
     componentWillReceiveProps(nextProps) {
@@ -177,17 +133,12 @@ export class Map extends Component {
 
             modifiedUnits.forEach((unit) => {
                 if (!this.props.population[unit.id]) {
-                    var unitMesh = new THREE.Mesh(
-                        new THREE.BoxGeometry(30, 30, 30),
-                        new THREE.MeshLambertMaterial({color: 0x0000ff})
-                    );
+                    var unitObject = this.objects.man.clone();
 
-                    unitMesh.position.set(unit.x, unit.y, unit.z);
+                    unitObject.position.set(unit.x, unit.y, unit.z);
 
-                    unitMesh.castShadow = true;
-
-                    this.group.add(unitMesh);
-                    this.units[unit.id] = unitMesh;
+                    this.group.add(unitObject);
+                    this.units[unit.id] = unitObject;
                 }
                 else {
                     updatedUnits.push(unit.id);
@@ -207,7 +158,6 @@ export class Map extends Component {
                     const unit = nextProps.population[id];
 
                     this.units[id].position.set(unit.x, unit.y, unit.z);
-                    this.units[id].scale.set(unit.scale, unit.scale, unit.scale);
                 }
             });
 
@@ -227,6 +177,42 @@ export class Map extends Component {
 
     shouldComponentUpdate() {
         return false;
+    }
+
+    loadAsset(loader, uri, base = 'assets') {
+        return new Promise((resolve, reject) => {
+            loader.load(
+                `${base}/${uri}`,
+                (geometry, materials) => {
+                    const material = new THREE.MultiMaterial(materials);
+                    const object = new THREE.Mesh(geometry, material);
+
+                    object.scale.set(10, 10, 10);
+                    object.rotation.set(0, Math.PI, 0);
+                    object.castShadow = true;
+                    object.receiveShadow = true;
+
+                    resolve(object);
+                },
+                () => {},
+                (err) => {
+                    reject(err);
+                }
+            );
+        });
+    }
+
+    async createAssets() {
+        const loader = new THREE.JSONLoader();
+        const objects = {};
+
+        for (const sprite of assetsManifest.sprites) {
+            const object = await this.loadAsset(loader, sprite.uri);
+
+            objects[sprite.name] = object;
+        }
+
+        return objects;
     }
 
     render() {

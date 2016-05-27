@@ -12,8 +12,10 @@
     "watch:js": "webpack -d --watch",
     "watch:html": "watch 'npm run build:html' src/html",
     "build:html": "mkdir -p dist && cp ./src/html/* dist/.",
-    "build": "npm run build:html && npm run build:css && npm run build:js",
-    "watch": "npm run watch:html & npm run watch:css & npm run watch:js",
+    "watch:assets": "watch 'npm run build:assets' src/assets",
+    "build:assets": "bash scripts/build_assets.sh",
+    "build": "npm run build:html && npm run build:assets && npm run build:css && npm run build:js",
+    "watch": "npm run watch:html & npm run watch:assets & npm run watch:css & npm run watch:js",
     "start": "node scripts/server.js & npm run watch"
   },
   "devDependencies": {
