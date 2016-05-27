@@ -4,8 +4,12 @@ import {connect} from 'react-redux';
 import {createStructuredSelector} from 'reselect';
 import difference from 'lodash/difference';
 import values from 'lodash/values';
+import find from 'lodash/find';
 
-import {addUnitAtMouse} from 'js/Population/actions';
+import {
+    findItemUnderMouse,
+    addUnitAtPoint,
+} from 'js/Population/actions';
 import {setCamera} from './actions';
 import {onTime} from 'js/Sprite/actions';
 import assetsManifest from 'assets/manifest';
@@ -22,7 +26,8 @@ export class Map extends Component {
         }),
         mouseKey: PropTypes.string.isRequired,
         time: PropTypes.number.isRequired,
-        addUnitAtMouse: PropTypes.func.isRequired,
+        findItemUnderMouse: PropTypes.func.isRequired,
+        addUnitAtPoint: PropTypes.func.isRequired,
         setCamera: PropTypes.func.isRequired,
         onTime: PropTypes.func.isRequired,
     }
@@ -34,6 +39,7 @@ export class Map extends Component {
         } = this.props;
 
         this.units = {};
+        this.selectedableUnits = {};
         this.zoom = 0.5;
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.camera = new THREE.OrthographicCamera(
@@ -58,9 +64,7 @@ export class Map extends Component {
             .then((objects) => {
                 this.objects = objects;
 
-                this.man = this.objects.man.clone();
-                this.man.position.set(300, 0, 300);
-                this.scene.add(this.man);
+                this.props.addUnitAtPoint(new THREE.Vector3(300, 0, 300));
 
                 this.house = this.objects.house.clone();
                 this.house.position.set(550, 0, 550);
@@ -108,7 +112,19 @@ export class Map extends Component {
     componentWillReceiveProps(nextProps) {
         if (nextProps.mouseKey === 'LMB' && this.props.mouseKey !== nextProps.mouseKey) {
             console.log('componentWillReceiveProps');
-            this.props.addUnitAtMouse(this.scene, this.camera);
+            const item = this.props.findItemUnderMouse(this.scene, this.camera);
+
+            if (item && item.object !== this.floor) {
+                const object = find(this.units, (unit) =>
+                    unit.children[0] === item.object
+                );
+                if (object) {
+                    object.children[1].visible = 1;
+                }
+            }
+            else if (item) {
+                this.props.addUnitAtPoint(item.point);
+            }
         }
 
         if (nextProps.camera !== this.props.camera) {
@@ -192,7 +208,22 @@ export class Map extends Component {
                     object.castShadow = true;
                     object.receiveShadow = true;
 
-                    resolve(object);
+                    const group = new THREE.Group();
+
+                    const marker = new THREE.Mesh(
+                        new THREE.BoxGeometry(10, 10, 10),
+                        new THREE.MeshLambertMaterial({color: 0xE33D3D})
+                    );
+                    marker.visible = false;
+
+                    const objectHeight = object.geometry.boundingSphere.radius * 2 * 10;
+
+                    marker.position.set(0, objectHeight * 1.20, 0);
+
+                    group.add(object);
+                    group.add(marker);
+
+                    resolve(group);
                 },
                 () => {},
                 (err) => {
@@ -232,7 +263,8 @@ const mapStateToProps = createStructuredSelector({
 });
 
 const mapDispatchToProps = {
-    addUnitAtMouse,
+    findItemUnderMouse,
+    addUnitAtPoint,
     setCamera,
     onTime,
 };

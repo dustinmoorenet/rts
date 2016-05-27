@@ -58,39 +58,40 @@ export function findItemUnderMouse(scene, camera) {
 
         raycaster.setFromCamera(mouse, camera);
 
-        const intersects = raycaster.intersectObjects(scene.children);
+        const intersects = raycaster.intersectObjects(scene.children, true);
 
+console.log('what intersects', intersects);
         if (intersects.length > 0) {
-            return intersects[0].point;
+            return intersects[0];
         }
 
         return null;
     };
 }
 
-export function addUnitAtMouse(scene, camera) {
+export function addUnitAtPoint(point) {
     return (dispatch) => {
-        const point = dispatch(findItemUnderMouse(scene, camera));
-
-        if (point) {
-            dispatch(addUnit({
-                type: 'sprite',
-                id: uniqueId(),
-                scale: 1,
-                x: point.x,
-                y: 0,
-                z: point.z,
-                walkRate: 5,
-                metabolismRate: 0.05,
-                tasks: [{
-                    type: 'goTo',
-                    payload: {
-                        x: 500,
-                        y: 0,
-                        z: 500,
-                    },
-                }],
-            }));
+        if (!point) {
+            return;
         }
+
+        dispatch(addUnit({
+            type: 'sprite',
+            id: uniqueId(),
+            scale: 1,
+            x: point.x,
+            y: 0,
+            z: point.z,
+            walkRate: 5,
+            metabolismRate: 0.05,
+            tasks: [{
+                type: 'goTo',
+                payload: {
+                    x: 500,
+                    y: 0,
+                    z: 500,
+                },
+            }],
+        }));
     };
 }
