@@ -1,78 +1,26 @@
-import React, {Component, PropTypes} from 'react';
-import {connect} from 'react-redux';
-import {createStructuredSelector} from 'reselect';
-import THREE from 'three';
+export default class Sprite {
+    constructor(initialProps, assets, store) {
+        this.store = store;
+        this.assets = assets;
 
-import {
-    move,
-    attrition,
-    handleTask,
-} from './actions';
+        if (this.createNode) {
+            this.createNode();
+        }
 
-export class Sprite extends Component {
-    static propTypes = {
-        id: PropTypes.number.isRequired,
-        r: PropTypes.number.isRequired,
-        x: PropTypes.number.isRequired,
-        y: PropTypes.number.isRequired,
-        z: PropTypes.number.isRequired,
-        metabolismRate: PropTypes.number.isRequired,
-        hotKey: PropTypes.string.isRequired,
-        time: PropTypes.number.isRequired,
-        lastTime: PropTypes.number.isRequired,
-        move: PropTypes.func.isRequired,
-        attrition: PropTypes.func.isRequired,
-        handleTask: PropTypes.func.isRequired,
+        this.setProps(initialProps);
     }
 
-    constructor(props, context) {
-        super(props, context);
+    setProps(props) {
+        this.needsRender =
+            !this.props ||
+            !!(this.shouldComponentUpdate && this.shouldComponentUpdate(props));
 
-        this.position = new THREE.Vector3(0, 0, 0);
+        this.props = props;
     }
 
-    render() {
-        const {
-            r,
-            x,
-            y,
-            z,
-        } = this.props;
+    baseRender() {
+        this.render();
 
-        this.position.setY(r / 2);
-        this.position.setX(x);
-        this.position.setZ(z);
-
-        return (
-            <mesh
-                position={this.position}
-                receiveShadow
-                castShadow
-            >
-                <boxGeometry
-                    width={r}
-                    height={r}
-                    depth={r}
-                />
-                <meshLambertMaterial
-                    color={0x0000ff}
-                />
-            </mesh>
-        );
+        this.needsRender = false;
     }
 }
-
-// browser.js:40 Uncaught Invariant Violation: Could not find "store" in either the context or props of "Connect(Sprite)". Either wrap the root component in a <Provider>, or explicitly pass "store" as a prop to "Connect(Sprite)".
-const mapStateToProps = createStructuredSelector({
-    hotKey: (state) => state.app.hotKey,
-    time: (state) => state.timeMachine.time,
-    lastTime: (state) => state.timeMachine.lastTime,
-});
-
-const mapDispatchToProps = {
-    move,
-    attrition,
-    handleTask,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Sprite);

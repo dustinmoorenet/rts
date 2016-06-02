@@ -5,6 +5,7 @@ import {createStructuredSelector} from 'reselect';
 import difference from 'lodash/difference';
 import values from 'lodash/values';
 import find from 'lodash/find';
+import reduce from 'lodash/reduce';
 
 import {
     findItemUnderMouse,
@@ -12,6 +13,7 @@ import {
 } from 'js/Population/actions';
 import {setCamera} from './actions';
 import {onTime} from 'js/Sprite/actions';
+import Man from 'js/Man/component';
 import assetsManifest from 'assets/manifest';
 
 export class Map extends Component {
@@ -53,16 +55,17 @@ export class Map extends Component {
         this.scene = new THREE.Scene();
         this.floor = new THREE.Mesh(
             new THREE.BoxGeometry(2000, 1, 2000),
-            new THREE.MeshLambertMaterial({color: 0x00ff00})
+            new THREE.MeshLambertMaterial({color: 0x0A8F15})
         );
         this.group = new THREE.Group();
         var ambient = new THREE.AmbientLight(0xffffff, 0.1);
         var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         var lightPosition = new THREE.Vector3(1000, 1500, 500);
 
-        this.createAssets()
+        this.loadAssets()
             .then((objects) => {
                 this.objects = objects;
+                console.log('load assets', this.objects);
 
                 this.props.addUnitAtPoint(new THREE.Vector3(300, 0, 300));
 
@@ -149,11 +152,9 @@ export class Map extends Component {
 
             modifiedUnits.forEach((unit) => {
                 if (!this.props.population[unit.id]) {
-                    var unitObject = this.objects.man.clone();
+                    const unitObject = new Man(unit, this.objects, global.store);
 
-                    unitObject.position.set(unit.x, unit.y, unit.z);
-
-                    this.group.add(unitObject);
+                    this.group.add(unitObject.node);
                     this.units[unit.id] = unitObject;
                 }
                 else {
@@ -163,7 +164,7 @@ export class Map extends Component {
 
             removedUnits.forEach((id) => {
                 if (this.units[id]) {
-                    this.group.remove(this.units[id]);
+                    this.group.remove(this.units[id].node);
 
                     delete this.units[id];
                 }
@@ -173,11 +174,21 @@ export class Map extends Component {
                 if (this.units[id]) {
                     const unit = nextProps.population[id];
 
-                    this.units[id].position.set(unit.x, unit.y, unit.z);
+                    this.units[id].setProps(unit);
                 }
             });
 
-            if (modifiedUnits.length || removedUnits.length) {
+            const needsRender = reduce(this.units, (prev, unit) => {
+                if (unit.needsRender) {
+                    unit.baseRender();
+
+                    return true;
+                }
+
+                return prev;
+            }, false);
+
+            if (needsRender) {
                 this.renderer.render(this.scene, this.camera);
             }
         }
@@ -233,7 +244,7 @@ export class Map extends Component {
         });
     }
 
-    async createAssets() {
+    async loadAssets() {
         const loader = new THREE.JSONLoader();
         const objects = {};
 
