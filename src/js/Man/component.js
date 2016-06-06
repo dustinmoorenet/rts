@@ -1,24 +1,112 @@
+import THREE from 'three';
+import {createSelector, createStructuredSelector} from 'reselect';
+
 import Sprite from 'js/Sprite/component';
+import {
+    actionTypes,
+    onTime,
+} from 'js/Sprite/actions';
+
+const makeUnitSelector = (id) => createSelector(
+    (state) => state.population,
+    (population) => population[id]
+);
+
+const makeManSelector = (initialState, initialProps) => {
+    const unitSelector = makeUnitSelector(initialProps.id);
+
+    return createStructuredSelector({
+        id: (state, props) => props.id,
+        unit: unitSelector,
+    });
+};
 
 export default class Man extends Sprite {
-    createNode() {
-        this.node = this.assets.man.clone();
+    createNode(initialProps) {
+        this.node = new THREE.Group();
+
+        this.parts = {
+            container: new THREE.Group(),
+            body: this.env.assets.body_002.clone(),
+            arms_middle: this.env.assets.arms_middle_002.clone(),
+            legs_middle: this.env.assets.legs_middle_002.clone(),
+            legs_walk_1: this.env.assets.legs_walk_1_002.clone(),
+            legs_walk_2: this.env.assets.legs_walk_2_002.clone(),
+        };
+        this.node.add(this.parts.container);
+
+        const oneDegree = Math.PI / 180;
+        this.parts.container.rotation.set(0, oneDegree * 135, 0);
+
+        this.propsSelector = makeManSelector(this.env.store.getState(), initialProps);
+        this.unsubscribe = this.env.store.subscribe(() => this.onStoreChange());
+
+        return this.propsSelector(this.env.store.getState(), initialProps);
+    }
+
+    onStoreChange() {
+        const time = this.env.store.getState().timeMachine.time;
+
+        if (time !== this.time) {
+            this.time = time;
+
+            this.env.store.dispatch(onTime(this.props.id));
+        }
+        else {
+            const nextProps = this.propsSelector(this.env.store.getState(), this.props);
+
+            if (nextProps !== this.props) {
+                this.setProps(nextProps);
+            }
+        }
+    }
+
+    remove() {
+        this.unsubscribe();
+
+        this.env.render();
     }
 
     shouldComponentUpdate(nextProps) {
+        if (!nextProps.unit) {
+            this.remove();
+
+            return false;
+        }
+
         return (
-            nextProps.x !== this.props.x ||
-            nextProps.y !== this.props.y ||
-            nextProps.z !== this.props.z
+            nextProps.unit.x !== this.props.unit.x ||
+            nextProps.unit.y !== this.props.unit.y ||
+            nextProps.unit.z !== this.props.unit.z ||
+            nextProps.unit.currentAction !== this.props.unit.currentAction
         );
     }
 
     render() {
         const {
-            x,
-            y,
-            z,
+            unit: {
+                x,
+                y,
+                z,
+                currentAction,
+            },
         } = this.props;
+
+        const container = this.parts.container;
+
+        container.remove(...container.children);
+
+        if (currentAction === actionTypes.STAND) {
+            container.add(this.parts.body);
+            container.add(this.parts.arms_middle);
+            container.add(this.parts.legs_middle);
+        }
+
+        if (currentAction === actionTypes.WALK) {
+            container.add(this.parts.body);
+            container.add(this.parts.arms_middle);
+            container.add(this.parts.legs_walk_1);
+        }
 
         this.node.position.set(x, y, z);
 

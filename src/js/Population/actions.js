@@ -1,6 +1,8 @@
 import uniqueId from 'lodash/uniqueId';
 import THREE from 'three';
 
+import {actionTypes} from 'js/Sprite/actions';
+
 const BASE = 'population';
 export const SET = `${BASE}/SET`;
 export const ADD_UNIT = `${BASE}/ADD_UNIT`;
@@ -60,7 +62,6 @@ export function findItemUnderMouse(scene, camera) {
 
         const intersects = raycaster.intersectObjects(scene.children, true);
 
-console.log('what intersects', intersects);
         if (intersects.length > 0) {
             return intersects[0];
         }
@@ -84,12 +85,14 @@ export function addUnitAtPoint(point) {
             z: point.z,
             walkRate: 5,
             metabolismRate: 0.05,
+            currentAction: actionTypes.STAND,
+            // tasks: [],
             tasks: [{
                 type: 'goTo',
                 payload: {
-                    x: 500,
+                    x: 400,
                     y: 0,
-                    z: 500,
+                    z: 400,
                 },
             }],
         }));

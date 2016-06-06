@@ -3,6 +3,11 @@ import {
     removeUnit,
 } from 'js/Population/actions';
 
+export const actionTypes = {
+    WALK: 'WALK',
+    STAND: 'STAND',
+};
+
 export function attrition(id, amount) {
     return (dispatch, getState) => {
         const unit = getState().population[id];
@@ -55,6 +60,7 @@ export function goTo(id, position) {
             return dispatch(updateUnit(unit.id, {
                 x: x + aDistance,
                 z: z + bDistance,
+                currentAction: actionTypes.WALK,
                 tasks: [
                     {
                         type: 'goTo',
@@ -73,6 +79,7 @@ export function goTo(id, position) {
             x: position.x,
             y: position.y,
             z: position.z,
+            currentAction: actionTypes.STAND,
         }));
     };
 }
@@ -115,9 +122,17 @@ export function handleTask(id) {
     };
 }
 
-export function onTime(id, delta) {
+export function onTime(id) {
     return (dispatch, getState) => {
-        const unit = getState().population[id];
+        const {
+            timeMachine: {
+                time,
+                lastTime,
+            },
+            population,
+        } = getState();
+        const unit = population[id];
+        const delta = time - lastTime;
 
         if (!unit) {
             return;

@@ -1,13 +1,13 @@
 export default class Sprite {
-    constructor(initialProps, assets, store) {
-        this.store = store;
-        this.assets = assets;
+    constructor(initialProps, env) {
+        this.env = env;
 
         if (this.createNode) {
-            this.createNode();
+            this.setProps(this.createNode(initialProps));
         }
-
-        this.setProps(initialProps);
+        else {
+            this.setProps(initialProps);
+        }
     }
 
     setProps(props) {

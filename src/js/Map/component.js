@@ -12,9 +12,20 @@ import {
     addUnitAtPoint,
 } from 'js/Population/actions';
 import {setCamera} from './actions';
-import {onTime} from 'js/Sprite/actions';
 import Man from 'js/Man/component';
 import assetsManifest from 'assets/manifest';
+
+const makeEnv = (renderer, scene, camera, store) => (
+    {
+        renderer,
+        scene,
+        camera,
+        store,
+        render() {
+            renderer.render(scene, camera);
+        },
+    }
+);
 
 export class Map extends Component {
     static propTypes = {
@@ -31,7 +42,6 @@ export class Map extends Component {
         findItemUnderMouse: PropTypes.func.isRequired,
         addUnitAtPoint: PropTypes.func.isRequired,
         setCamera: PropTypes.func.isRequired,
-        onTime: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -63,17 +73,10 @@ export class Map extends Component {
         var lightPosition = new THREE.Vector3(1000, 1500, 500);
 
         this.loadAssets()
-            .then((objects) => {
-                this.objects = objects;
-                console.log('load assets', this.objects);
+            .then((assets) => {
+                this.env.assets = assets;
 
                 this.props.addUnitAtPoint(new THREE.Vector3(300, 0, 300));
-
-                this.house = this.objects.house.clone();
-                this.house.position.set(550, 0, 550);
-                this.scene.add(this.house);
-
-                setTimeout(() => this.renderer.render(this.scene, this.camera), 250);
             });
 
         this.renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
@@ -109,12 +112,13 @@ export class Map extends Component {
         this.refs.holder.appendChild(this.renderer.domElement);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-        this.renderer.render(this.scene, this.camera);
+        this.env = makeEnv(this.renderer, this.scene, this.camera, global.store);
+
+        this.env.render();
     }
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.mouseKey === 'LMB' && this.props.mouseKey !== nextProps.mouseKey) {
-            console.log('componentWillReceiveProps');
             const item = this.props.findItemUnderMouse(this.scene, this.camera);
 
             if (item && item.object !== this.floor) {
@@ -131,7 +135,6 @@ export class Map extends Component {
         }
 
         if (nextProps.camera !== this.props.camera) {
-            console.log('update cameraPosition');
             this.cameraPosition.set(
                 nextProps.camera.x,
                 nextProps.camera.y,
@@ -148,17 +151,13 @@ export class Map extends Component {
                 Object.keys(this.props.population),
                 Object.keys(nextProps.population)
             );
-            const updatedUnits = [];
 
             modifiedUnits.forEach((unit) => {
                 if (!this.props.population[unit.id]) {
-                    const unitObject = new Man(unit, this.objects, global.store);
+                    const unitObject = new Man(unit, this.env);
 
                     this.group.add(unitObject.node);
                     this.units[unit.id] = unitObject;
-                }
-                else {
-                    updatedUnits.push(unit.id);
                 }
             });
 
@@ -169,36 +168,22 @@ export class Map extends Component {
                     delete this.units[id];
                 }
             });
+        }
 
-            updatedUnits.forEach((id) => {
-                if (this.units[id]) {
-                    const unit = nextProps.population[id];
-
-                    this.units[id].setProps(unit);
-                }
-            });
-
+        if (this.props.time !== nextProps.time) {
             const needsRender = reduce(this.units, (prev, unit) => {
                 if (unit.needsRender) {
                     unit.baseRender();
 
-                    return true;
+                    prev = true;
                 }
 
                 return prev;
             }, false);
 
             if (needsRender) {
-                this.renderer.render(this.scene, this.camera);
+                this.env.render();
             }
-        }
-
-        if (this.props.time !== nextProps.time) {
-            const delta = nextProps.time - this.props.time;
-
-            Object.keys(this.props.population).forEach((id) => {
-                this.props.onTime(id, delta);
-            });
         }
     }
 
@@ -277,7 +262,6 @@ const mapDispatchToProps = {
     findItemUnderMouse,
     addUnitAtPoint,
     setCamera,
-    onTime,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);
