@@ -83,8 +83,8 @@ export function addUnitAtPoint(point) {
             x: point.x,
             y: 0,
             z: point.z,
-            walkRate: 5,
-            metabolismRate: 0.05,
+            walkRate: 20,
+            metabolismRate: 0.005,
             currentAction: actionTypes.STAND,
             // tasks: [],
             tasks: [{

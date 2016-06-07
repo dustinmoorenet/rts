@@ -17,6 +17,14 @@ export default {
             uri: 'man/arms_middle_002.json',
         },
         {
+            name: 'arms_walk_1_002',
+            uri: 'man/arms_walk_1_002.json',
+        },
+        {
+            name: 'arms_walk_2_002',
+            uri: 'man/arms_walk_2_002.json',
+        },
+        {
             name: 'legs_middle_002',
             uri: 'man/legs_middle_002.json',
         },

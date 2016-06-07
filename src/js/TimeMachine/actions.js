@@ -4,6 +4,7 @@ export const SET_TIME = `${BASE}/SET_TIME`;
 export const SET_LAST_TIME = `${BASE}/SET_LAST_TIME`;
 export const SET_REAL_TIME = `${BASE}/SET_REAL_TIME`;
 export const SET_STOP_BLOCK = `${BASE}/SET_STOP_BLOCK`;
+export const UPDATE_TIME = `${BASE}/UPDATE_TIME`;
 
 export function setSpeed(speed) {
     return {
@@ -40,6 +41,13 @@ export function setStopBlock(stopBlock) {
     };
 }
 
+export function updateTime(payload) {
+    return {
+        type: UPDATE_TIME,
+        payload,
+    };
+}
+
 export function start() {
     return (dispatch) => {
         dispatch(setStopBlock(false));
@@ -63,13 +71,15 @@ export function update() {
         const now = Date.now();
         const lapse = now - realTime;
 
-        dispatch(setTime(time + (speed * lapse)));
-        dispatch(setRealTime(now));
-        dispatch(setLastTime(time));
+        dispatch(updateTime({
+            time: time + (speed * lapse),
+            realTime: now,
+            lastTime: time,
+        }));
 
         if (!stopBlock) {
             requestAnimationFrame(() => dispatch(update()));
-            // setTimeout(() => dispatch(update()), 2000);
+            // setTimeout(() => dispatch(update()), 500);
         }
     };
 }

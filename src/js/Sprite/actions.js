@@ -56,6 +56,7 @@ export function goTo(id, deltaTime, position) {
             return dispatch(updateUnit(unit.id, {
                 x: x + aDistance,
                 z: z + bDistance,
+                lookAt: [position.x, position.y, position.z],
                 currentAction: actionTypes.WALK,
                 tasks: [
                     {
@@ -75,6 +76,7 @@ export function goTo(id, deltaTime, position) {
             x: position.x,
             y: position.y,
             z: position.z,
+            lookAt: [position.x, position.y, position.z],
             currentAction: actionTypes.STAND,
         }));
     };
