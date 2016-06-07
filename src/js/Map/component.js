@@ -76,6 +76,11 @@ export class Map extends Component {
             .then((assets) => {
                 this.env.assets = assets;
 
+                this.house = this.env.assets.house.clone();
+
+                this.house.position.set(600, 0, 600);
+                this.env.scene.add(this.house);
+
                 this.props.addUnitAtPoint(new THREE.Vector3(300, 0, 300));
             });
 
