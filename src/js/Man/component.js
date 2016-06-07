@@ -40,24 +40,25 @@ export default class Man extends Sprite {
 
         this.propsSelector = makeManSelector(this.env.store.getState(), initialProps);
         this.unsubscribe = this.env.store.subscribe(() => this.onStoreChange());
+        this.unsubscribe = this.env.timeMachine.subscribe(() => this.onTime());
 
         return this.propsSelector(this.env.store.getState(), initialProps);
     }
 
+    onTime() {
+        const {
+            time,
+            lastTime,
+        } = this.env.timeMachine.getState();
+
+        this.env.store.dispatch(onTime(this.props.id, time - lastTime));
+    }
+
     onStoreChange() {
-        const time = this.env.store.getState().timeMachine.time;
+        const nextProps = this.propsSelector(this.env.store.getState(), this.props);
 
-        if (time !== this.time) {
-            this.time = time;
-
-            this.env.store.dispatch(onTime(this.props.id));
-        }
-        else {
-            const nextProps = this.propsSelector(this.env.store.getState(), this.props);
-
-            if (nextProps !== this.props) {
-                this.setProps(nextProps);
-            }
+        if (nextProps !== this.props) {
+            this.setProps(nextProps);
         }
     }
 

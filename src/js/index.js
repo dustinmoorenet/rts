@@ -3,6 +3,7 @@ import {render} from 'react-dom';
 import {Provider} from 'react-redux';
 
 import configureStore from 'js/configureStore';
+import {default as configureTimeMachine} from 'js/TimeMachine/configureStore';
 import App from 'js/App/component';
 import {start, setRealTime} from 'js/TimeMachine/actions';
 import {
@@ -12,9 +13,10 @@ import {
 } from 'js/App/actions';
 
 global.store = configureStore({debug: process.env.NODE_ENV === ''});
+global.timeMachine = configureTimeMachine({debug: process.env.NODE_ENV === ''});
 
-global.store.dispatch(setRealTime(Date.now()));
-global.store.dispatch(start());
+global.timeMachine.dispatch(setRealTime(Date.now()));
+global.timeMachine.dispatch(start());
 global.store.dispatch(listenToKeys());
 global.store.dispatch(listenToMouse());
 global.store.dispatch(listenToWindowSize());

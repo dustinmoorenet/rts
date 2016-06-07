@@ -15,12 +15,13 @@ import {setCamera} from './actions';
 import Man from 'js/Man/component';
 import assetsManifest from 'assets/manifest';
 
-const makeEnv = (renderer, scene, camera, store) => (
+const makeEnv = (renderer, scene, camera, store, timeMachine) => (
     {
         renderer,
         scene,
         camera,
         store,
+        timeMachine,
         render() {
             renderer.render(scene, camera);
         },
@@ -38,7 +39,6 @@ export class Map extends Component {
             z: PropTypes.number.isRequired,
         }),
         mouseKey: PropTypes.string.isRequired,
-        time: PropTypes.number.isRequired,
         findItemUnderMouse: PropTypes.func.isRequired,
         addUnitAtPoint: PropTypes.func.isRequired,
         setCamera: PropTypes.func.isRequired,
@@ -112,9 +112,11 @@ export class Map extends Component {
         this.refs.holder.appendChild(this.renderer.domElement);
         this.renderer.setSize(window.innerWidth, window.innerHeight);
 
-        this.env = makeEnv(this.renderer, this.scene, this.camera, global.store);
+        this.env = makeEnv(this.renderer, this.scene, this.camera, global.store, global.timeMachine);
 
         this.env.render();
+
+        this.env.timeMachine.subscribe(() => this.onTime());
     }
 
     componentWillReceiveProps(nextProps) {
@@ -169,26 +171,26 @@ export class Map extends Component {
                 }
             });
         }
-
-        if (this.props.time !== nextProps.time) {
-            const needsRender = reduce(this.units, (prev, unit) => {
-                if (unit.needsRender) {
-                    unit.baseRender();
-
-                    prev = true;
-                }
-
-                return prev;
-            }, false);
-
-            if (needsRender) {
-                this.env.render();
-            }
-        }
     }
 
     shouldComponentUpdate() {
         return false;
+    }
+
+    onTime() {
+        const needsRender = reduce(this.units, (prev, unit) => {
+            if (unit.needsRender) {
+                unit.baseRender();
+
+                prev = true;
+            }
+
+            return prev;
+        }, false);
+
+        if (needsRender) {
+            this.env.render();
+        }
     }
 
     loadAsset(loader, uri, base = 'assets') {
@@ -255,7 +257,6 @@ const mapStateToProps = createStructuredSelector({
     height: (state) => state.map.height,
     camera: (state) => state.map.camera,
     mouseKey: (state) => state.app.mouseKey,
-    time: (state) => state.timeMachine.time,
 });
 
 const mapDispatchToProps = {

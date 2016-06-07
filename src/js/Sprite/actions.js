@@ -30,17 +30,13 @@ export function attrition(id, amount) {
     };
 }
 
-export function goTo(id, position) {
+export function goTo(id, deltaTime, position) {
     return (dispatch, getState) => {
-        const state = getState();
-        const unit = state.population[id];
+        const unit = getState().population[id];
 
         if (!unit) {
             return null;
         }
-
-        const timeMachine = getState().timeMachine;
-        const deltaTime = (timeMachine.time - timeMachine.lastTime) / 1000;
 
         const {
             x,
@@ -52,7 +48,7 @@ export function goTo(id, position) {
         const bTotalDistance = position.z - z;
         const cTotalDistance = Math.sqrt(Math.pow(aTotalDistance, 2) + Math.pow(bTotalDistance, 2));
         const totalTravelTime = cTotalDistance / walkRate;
-        const percentDone = deltaTime / totalTravelTime;
+        const percentDone = (deltaTime / 1000) / totalTravelTime;
         const aDistance = aTotalDistance * percentDone;
         const bDistance = bTotalDistance * percentDone;
 
@@ -110,36 +106,29 @@ export function shiftTask(id) {
     };
 }
 
-export function handleTask(id) {
+export function handleTask(id, deltaTime) {
     return (dispatch) => {
         const task = dispatch(shiftTask(id));
 
         if (task) {
-            return dispatch(TASKS[task.type](id, task.payload));
+            return dispatch(TASKS[task.type](id, deltaTime, task.payload));
         }
 
         return null;
     };
 }
 
-export function onTime(id) {
+export function onTime(id, deltaTime) {
     return (dispatch, getState) => {
-        const {
-            timeMachine: {
-                time,
-                lastTime,
-            },
-            population,
-        } = getState();
+        const population = getState().population;
         const unit = population[id];
-        const delta = time - lastTime;
 
         if (!unit) {
             return;
         }
 
-        dispatch(attrition(id, (delta / 1000) * unit.metabolismRate));
+        dispatch(attrition(id, (deltaTime / 1000) * unit.metabolismRate));
 
-        dispatch(handleTask(id));
+        dispatch(handleTask(id, deltaTime));
     };
 }
