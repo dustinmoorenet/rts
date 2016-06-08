@@ -9,3 +9,15 @@ body {
 svg {
     background-color: green;
 }
+
+.control-panel {
+    position: fixed;
+    bottom: 0;
+    height: 100px;
+    width: 100%;
+    background: gray;
+
+    button.active {
+        background-color: blue;
+    }
+}

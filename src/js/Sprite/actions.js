@@ -6,6 +6,7 @@ import {
 export const actionTypes = {
     WALK: 'WALK',
     STAND: 'STAND',
+    BUILD: 'BUILD',
 };
 
 export function attrition(id, amount) {

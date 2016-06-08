@@ -70,14 +70,14 @@ export function findItemUnderMouse(scene, camera) {
     };
 }
 
-export function addUnitAtPoint(point) {
+export function addUnitAtPoint(type, point) {
     return (dispatch) => {
         if (!point) {
             return;
         }
 
         dispatch(addUnit({
-            type: 'sprite',
+            type,
             id: uniqueId(),
             scale: 1,
             x: point.x,
@@ -86,15 +86,15 @@ export function addUnitAtPoint(point) {
             walkRate: 20,
             metabolismRate: 0.005,
             currentAction: actionTypes.STAND,
-            // tasks: [],
-            tasks: [{
-                type: 'goTo',
-                payload: {
-                    x: 400,
-                    y: 0,
-                    z: 400,
-                },
-            }],
+            tasks: [],
+            // tasks: [{
+            //     type: 'goTo',
+            //     payload: {
+            //         x: 400,
+            //         y: 0,
+            //         z: 400,
+            //     },
+            // }],
         }));
     };
 }

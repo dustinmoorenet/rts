@@ -11,8 +11,11 @@ import {
     findItemUnderMouse,
     addUnitAtPoint,
 } from 'js/Population/actions';
+import {
+    cursorClicked,
+} from 'js/ControlPanel/actions';
 import {setCamera} from './actions';
-import Man from 'js/Man/component';
+import Units from 'js/Units';
 import assetsManifest from 'assets/manifest';
 
 const makeEnv = (renderer, scene, camera, store, timeMachine) => (
@@ -42,6 +45,7 @@ export class Map extends Component {
         findItemUnderMouse: PropTypes.func.isRequired,
         addUnitAtPoint: PropTypes.func.isRequired,
         setCamera: PropTypes.func.isRequired,
+        cursorClicked: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
@@ -76,12 +80,8 @@ export class Map extends Component {
             .then((assets) => {
                 this.env.assets = assets;
 
-                this.house = this.env.assets.house.clone();
-
-                this.house.position.set(600, 0, 600);
-                this.env.scene.add(this.house);
-
-                this.props.addUnitAtPoint(new THREE.Vector3(300, 0, 300));
+                this.props.addUnitAtPoint('man', new THREE.Vector3(300, 0, 300));
+                this.props.addUnitAtPoint('house', new THREE.Vector3(600, 0, 600));
             });
 
         this.renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
@@ -137,7 +137,7 @@ export class Map extends Component {
                 }
             }
             else if (item) {
-                this.props.addUnitAtPoint(item.point);
+                this.props.cursorClicked(item.point);
             }
         }
 
@@ -161,7 +161,8 @@ export class Map extends Component {
 
             modifiedUnits.forEach((unit) => {
                 if (!this.props.population[unit.id]) {
-                    const unitObject = new Man(unit, this.env);
+                    const Unit = Units[unit.type];
+                    const unitObject = new Unit(unit, this.env);
 
                     this.group.add(unitObject.node);
                     this.units[unit.id] = unitObject;
@@ -268,6 +269,7 @@ const mapDispatchToProps = {
     findItemUnderMouse,
     addUnitAtPoint,
     setCamera,
+    cursorClicked,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);
