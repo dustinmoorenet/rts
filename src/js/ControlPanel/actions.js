@@ -38,7 +38,7 @@ export function cursorClicked(point) {
         const {
             controlPanel: {
                 cursorTask,
-            }
+            },
         } = getState();
 
         if (cursorTask.type === taskTypes.BUILD_HOUSE) {
@@ -47,5 +47,5 @@ export function cursorClicked(point) {
         if (cursorTask.type === taskTypes.BUILD_MAN) {
             dispatch(addUnitAtPoint('man', point));
         }
-    }
+    };
 }

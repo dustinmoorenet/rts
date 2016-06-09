@@ -76,6 +76,19 @@ export function addUnitAtPoint(type, point) {
             return;
         }
 
+        const tasks = [];
+
+        if (type === 'man') {
+            tasks.push({
+                type: 'goTo',
+                payload: {
+                    x: 400,
+                    y: 0,
+                    z: 400,
+                },
+            });
+        }
+
         dispatch(addUnit({
             type,
             id: uniqueId(),
@@ -86,15 +99,7 @@ export function addUnitAtPoint(type, point) {
             walkRate: 20,
             metabolismRate: 0.005,
             currentAction: actionTypes.STAND,
-            tasks: [],
-            // tasks: [{
-            //     type: 'goTo',
-            //     payload: {
-            //         x: 400,
-            //         y: 0,
-            //         z: 400,
-            //     },
-            // }],
+            tasks,
         }));
     };
 }

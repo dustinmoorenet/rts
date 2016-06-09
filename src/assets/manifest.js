@@ -9,6 +9,18 @@ export default {
             uri: 'house/house.json',
         },
         {
+            name: 'white_smoke_001',
+            uri: 'smoke/white_smoke_001.json',
+        },
+        {
+            name: 'white_smoke_002',
+            uri: 'smoke/white_smoke_002.json',
+        },
+        {
+            name: 'white_smoke_003',
+            uri: 'smoke/white_smoke_003.json',
+        },
+        {
             name: 'body_002',
             uri: 'man/body_002.json',
         },

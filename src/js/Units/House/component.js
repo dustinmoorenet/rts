@@ -39,6 +39,9 @@ export default class House extends Sprite {
         this.parts = {
             container: new THREE.Group(),
             structure: this.env.assets.house.clone(),
+            smoke1: this.env.assets.white_smoke_001.clone(),
+            smoke2: this.env.assets.white_smoke_002.clone(),
+            smoke3: this.env.assets.white_smoke_003.clone(),
         };
         this.node.add(this.parts.container);
 
@@ -50,7 +53,8 @@ export default class House extends Sprite {
         this.unsubscribeTimeMachine = this.env.timeMachine.subscribe(() => this.onTimeChange());
 
         this.state = {
-            currentDisposition: dispositions.STAND,
+            currentDisposition: dispositions.ACTIVE4,
+            smokePositionY: 0,
             lastTime: 0,
         };
 
@@ -73,9 +77,10 @@ export default class House extends Sprite {
             unit,
         } = this.props;
         const {
-            currentDisposition,
             lastTime,
         } = this.state;
+        const pauseTime = 3000;
+        const smokeSpeed = 50;
 
         if (!unit) {
             return;
@@ -83,20 +88,25 @@ export default class House extends Sprite {
 
         const deltaTime = time - lastTime;
 
-        if (unit.currentAction === actionTypes.WALK && deltaTime > 250) {
-            const state = {lastTime: time};
+        if (unit.currentAction === actionTypes.STAND) {
+            const state = {
+                ...this.state,
+                smokePositionY: ((deltaTime / 1000) * smokeSpeed) + 80,
+            };
 
-            if (currentDisposition === dispositions.WALK1) {
-                state.currentDisposition = dispositions.WALK2;
+            if (deltaTime > pauseTime + 2000) {
+                state.lastTime = time;
+                state.smokePositionY = 0;
+                state.currentDisposition = dispositions.ACTIVE4;
             }
-            else if (currentDisposition === dispositions.WALK2) {
-                state.currentDisposition = dispositions.WALK3;
+            else if (deltaTime > pauseTime + 1250) {
+                state.currentDisposition = dispositions.ACTIVE3;
             }
-            else if (currentDisposition === dispositions.WALK3) {
-                state.currentDisposition = dispositions.WALK4;
+            else if (deltaTime > pauseTime + 750) {
+                state.currentDisposition = dispositions.ACTIVE2;
             }
-            else {
-                state.currentDisposition = dispositions.WALK1;
+            else if (deltaTime > pauseTime) {
+                state.currentDisposition = dispositions.ACTIVE1;
             }
 
             this.setState(state);
@@ -130,7 +140,8 @@ export default class House extends Sprite {
             nextProps.unit.y !== this.props.unit.y ||
             nextProps.unit.z !== this.props.unit.z ||
             nextProps.unit.currentAction !== this.props.unit.currentAction ||
-            nextState.currentDisposition !== this.state.currentDisposition
+            nextState.currentDisposition !== this.state.currentDisposition ||
+            nextState.smokePositionY !== this.state.smokePositionY
         );
     }
 
@@ -146,6 +157,7 @@ export default class House extends Sprite {
         } = this.props;
         const {
             currentDisposition,
+            smokePositionY,
         } = this.state;
 
         const container = this.parts.container;
@@ -154,6 +166,19 @@ export default class House extends Sprite {
 
         if (currentAction === actionTypes.STAND) {
             container.add(this.parts.structure);
+
+            if (currentDisposition === dispositions.ACTIVE1) {
+                container.add(this.parts.smoke1);
+                this.parts.smoke1.position.set(100, smokePositionY, 90);
+            }
+            if (currentDisposition === dispositions.ACTIVE2) {
+                container.add(this.parts.smoke2);
+                this.parts.smoke2.position.set(100, smokePositionY, 90);
+            }
+            if (currentDisposition === dispositions.ACTIVE3) {
+                container.add(this.parts.smoke3);
+                this.parts.smoke3.position.set(100, smokePositionY, 90);
+            }
         }
 
         if (currentAction === actionTypes.BUILD) {
