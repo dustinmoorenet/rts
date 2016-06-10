@@ -6,6 +6,7 @@ import {createStructuredSelector} from 'reselect';
 import {
     buildHouse,
     buildMan,
+    buildDeer,
     taskTypes,
 } from './actions';
 
@@ -16,6 +17,10 @@ export class ControlPanel extends Component {
 
     buildMan = () => {
         this.props.buildMan();
+    }
+
+    buildDeer = () => {
+        this.props.buildDeer();
     }
 
     render() {
@@ -35,6 +40,11 @@ export class ControlPanel extends Component {
                     onClick={this.buildMan}
                 >Man
                 </button>
+                <button
+                    className={classNames({active: cursorTask.type === taskTypes.BUILD_DEER})}
+                    onClick={this.buildDeer}
+                >Deer
+                </button>
             </div>
         );
     }
@@ -44,6 +54,7 @@ ControlPanel.propTypes = {
     cursorTask: PropTypes.object.isRequired,
     buildHouse: PropTypes.func.isRequired,
     buildMan: PropTypes.func.isRequired,
+    buildDeer: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -53,6 +64,7 @@ const mapStateToProps = createStructuredSelector({
 const mapDispatchToProps = {
     buildHouse,
     buildMan,
+    buildDeer,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(ControlPanel);

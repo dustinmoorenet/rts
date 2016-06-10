@@ -8,6 +8,7 @@ export const SET_CURSOR_TASK = `${BASE}/SET_CURSOR_TASK`;
 export const taskTypes = {
     BUILD_HOUSE: 'BUILD_HOUSE',
     BUILD_MAN: 'BUILD_MAN',
+    BUILD_DEER: 'BUILD_DEER',
 };
 
 export function setCursorTask(cursorTask) {
@@ -33,6 +34,14 @@ export function buildMan() {
     };
 }
 
+export function buildDeer() {
+    return (dispatch) => {
+        dispatch(setCursorTask({
+            type: taskTypes.BUILD_DEER,
+        }));
+    };
+}
+
 export function cursorClicked(point) {
     return (dispatch, getState) => {
         const {
@@ -46,6 +55,9 @@ export function cursorClicked(point) {
         }
         if (cursorTask.type === taskTypes.BUILD_MAN) {
             dispatch(addUnitAtPoint('man', point));
+        }
+        if (cursorTask.type === taskTypes.BUILD_DEER) {
+            dispatch(addUnitAtPoint('deer', point));
         }
     };
 }

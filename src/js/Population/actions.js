@@ -78,7 +78,7 @@ export function addUnitAtPoint(type, point) {
 
         const tasks = [];
 
-        if (type === 'man') {
+        if (type === 'man' || type === 'deer') {
             tasks.push({
                 type: 'goTo',
                 payload: {
