@@ -17,6 +17,9 @@ import {
 import {setCamera} from './actions';
 import Units from 'js/Units';
 import assetsManifest from 'assets/manifest';
+import {
+    findFood,
+} from 'js/Units/Deer/actions';
 
 const makeEnv = (renderer, scene, camera, store, timeMachine) => (
     {
@@ -34,8 +37,15 @@ const makeEnv = (renderer, scene, camera, store, timeMachine) => (
 export class Map extends Component {
     static propTypes = {
         population: PropTypes.object.isRequired,
-        width: PropTypes.number.isRequired,
-        height: PropTypes.number.isRequired,
+        viewPort: PropTypes.shape({
+            width: PropTypes.number.isRequired,
+            height: PropTypes.number.isRequired,
+        }),
+        size: PropTypes.shape({
+            x: PropTypes.number.isRequired,
+            y: PropTypes.number.isRequired,
+            z: PropTypes.number.isRequired,
+        }),
         camera: PropTypes.shape({
             x: PropTypes.number.isRequired,
             y: PropTypes.number.isRequired,
@@ -46,12 +56,13 @@ export class Map extends Component {
         addUnitAtPoint: PropTypes.func.isRequired,
         setCamera: PropTypes.func.isRequired,
         cursorClicked: PropTypes.func.isRequired,
+        findFood: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
         const {
-            width,
-            height,
+            viewPort,
+            size,
         } = this.props;
 
         this.units = {};
@@ -59,16 +70,16 @@ export class Map extends Component {
         this.zoom = 0.5;
         this.renderer = new THREE.WebGLRenderer({antialias: true});
         this.camera = new THREE.OrthographicCamera(
-            (width / - 2) / this.zoom,
-            (width / 2) / this.zoom,
-            (height / 2) / this.zoom,
-            (height / - 2) / this.zoom,
+            (viewPort.width / - 2) / this.zoom,
+            (viewPort.width / 2) / this.zoom,
+            (viewPort.height / 2) / this.zoom,
+            (viewPort.height / - 2) / this.zoom,
             1,
             10000
         );
         this.scene = new THREE.Scene();
         this.floor = new THREE.Mesh(
-            new THREE.BoxGeometry(2000, 1, 2000),
+            new THREE.BoxGeometry(size.x, 1, size.z),
             new THREE.MeshLambertMaterial({color: 0x0A8F15})
         );
         this.group = new THREE.Group();
@@ -80,8 +91,9 @@ export class Map extends Component {
             .then((assets) => {
                 this.env.assets = assets;
 
-                this.props.addUnitAtPoint('man', new THREE.Vector3(300, 0, 300));
-                this.props.addUnitAtPoint('house', new THREE.Vector3(600, 0, 600));
+                const id = this.props.addUnitAtPoint('deer', new THREE.Vector3(300, 0, 300));
+
+                this.props.findFood(id);
             });
 
         this.renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
@@ -107,7 +119,7 @@ export class Map extends Component {
         directionalLight.shadow.mapSize.Width = 1024;
 
         this.floor.receiveShadow = true;
-        this.floor.position.set(1000, -0.5, 1000);
+        this.floor.position.set(size.x / 2, -0.5, size.z / 2);
 
         this.scene.add(this.camera);
         this.scene.add(this.floor);
@@ -115,7 +127,7 @@ export class Map extends Component {
         this.scene.add(directionalLight);
         this.scene.add(this.group);
         this.refs.holder.appendChild(this.renderer.domElement);
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setSize(viewPort.width, viewPort.height);
 
         this.env = makeEnv(this.renderer, this.scene, this.camera, global.store, global.timeMachine);
 
@@ -176,6 +188,23 @@ export class Map extends Component {
                     delete this.units[id];
                 }
             });
+        }
+
+        if (nextProps.viewPort !== this.props.viewPort) {
+            const {
+                width,
+                height,
+            } = nextProps.viewPort;
+
+            this.camera.left = (width / - 2) / this.zoom;
+            this.camera.right = (width / 2) / this.zoom;
+            this.camera.top = (height / 2) / this.zoom;
+            this.camera.bottom = (height / - 2) / this.zoom;
+            this.renderer.setSize(width, height);
+
+            this.camera.updateProjectionMatrix();
+
+            this.env.render();
         }
     }
 
@@ -259,8 +288,8 @@ export class Map extends Component {
 
 const mapStateToProps = createStructuredSelector({
     population: (state) => state.population,
-    width: (state) => state.map.width,
-    height: (state) => state.map.height,
+    viewPort: (state) => state.map.viewPort,
+    size: (state) => state.map.size,
     camera: (state) => state.map.camera,
     mouseKey: (state) => state.app.mouseKey,
 });
@@ -270,6 +299,7 @@ const mapDispatchToProps = {
     addUnitAtPoint,
     setCamera,
     cursorClicked,
+    findFood,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);

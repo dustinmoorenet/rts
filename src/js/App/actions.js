@@ -3,7 +3,7 @@ export const SET_HOT_KEY = `${BASE}/SET_HOT_KEY`;
 export const SET_MOUSE_KEY = `${BASE}/SET_MOUSE_KEY`;
 export const SET_MOUSE_POSITION = `${BASE}/SET_MOUSE_POSITION`;
 
-import {setSize} from 'js/Map/actions';
+import {setViewPort} from 'js/Map/actions';
 
 export function setHotKey(hotKey = '') {
     return {
@@ -44,7 +44,7 @@ export function listenToMouse() {
 export function listenToWindowSize() {
     return (dispatch) => {
         function onResize() {
-            dispatch(setSize({width: window.innerWidth, height: window.innerHeight}));
+            dispatch(setViewPort({width: window.innerWidth, height: window.innerHeight}));
         }
 
         window.addEventListener('resize', onResize);

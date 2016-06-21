@@ -50,7 +50,6 @@ export default class House extends Sprite {
 
         this.state = {
             currentDisposition: dispositions.ACTIVE4,
-            smokePositionY: 0,
             lastTime: 0,
         };
 

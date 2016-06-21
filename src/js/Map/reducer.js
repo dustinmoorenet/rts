@@ -1,27 +1,24 @@
 import {combineReducers} from 'redux';
-import reduceReducers from 'reduce-reducers';
 
 import {
     SET_SIZE,
+    SET_VIEW_PORT,
     SET_CAMERA,
 } from './actions';
 
-export function handleSetSize(state, action = {}) {
+function size(state = {x: 0, y: 0, z: 0}, action = {}) {
     if (action.type === SET_SIZE) {
-        return {
-            ...state,
-            ...action.payload,
-        };
+        return action.payload;
     }
 
     return state;
 }
 
-function width(state = 0) {
-    return state;
-}
+function viewPort(state = {width: 0, height: 0}, action = {}) {
+    if (action.type === SET_VIEW_PORT) {
+        return action.payload;
+    }
 
-function height(state = 0) {
     return state;
 }
 
@@ -33,13 +30,8 @@ function camera(state = {x: 0, y: 0, z: 0}, action = {}) {
     return state;
 }
 
-const reducer = combineReducers({
-    width,
-    height,
+export default combineReducers({
+    size,
+    viewPort,
     camera,
 });
-
-export default reduceReducers(
-    reducer,
-    handleSetSize
-);

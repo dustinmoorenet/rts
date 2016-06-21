@@ -73,12 +73,12 @@ export function findItemUnderMouse(scene, camera) {
 export function addUnitAtPoint(type, point) {
     return (dispatch) => {
         if (!point) {
-            return;
+            return null;
         }
 
         const tasks = [];
 
-        if (type === 'man' || type === 'deer') {
+        if (type === 'man') {
             tasks.push({
                 type: 'goTo',
                 payload: {
@@ -89,9 +89,11 @@ export function addUnitAtPoint(type, point) {
             });
         }
 
+        const id = uniqueId();
+
         dispatch(addUnit({
             type,
-            id: uniqueId(),
+            id,
             scale: 1,
             x: point.x,
             y: 0,
@@ -101,5 +103,7 @@ export function addUnitAtPoint(type, point) {
             currentAction: actionTypes.STAND,
             tasks,
         }));
+
+        return id;
     };
 }
