@@ -53,7 +53,7 @@ export function findItemUnderMouse(scene, camera) {
         const {
             width,
             height,
-        } = state.map;
+        } = state.map.viewPort;
 
         mouse.x = (mouseX / width) * 2 - 1;
         mouse.y = - (mouseY / height) * 2 + 1;
