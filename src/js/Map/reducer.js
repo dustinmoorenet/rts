@@ -22,7 +22,7 @@ function viewPort(state = {width: 0, height: 0}, action = {}) {
     return state;
 }
 
-function camera(state = {x: 0, y: 0, z: 0}, action = {}) {
+function camera(state = {position: {x: 0, y: 0, z: 0}, rotation: 0, translate: {x: 0, y: 0, z: 0}, zoom: 1}, action = {}) {
     if (action.type === SET_CAMERA) {
         return action.payload;
     }

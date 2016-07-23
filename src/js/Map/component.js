@@ -14,12 +14,17 @@ import {
 import {
     cursorClicked,
 } from 'js/ControlPanel/actions';
-import {setCamera} from './actions';
+import {
+    moveCamera,
+    rotateCamera,
+    zoomCamera,
+} from './actions';
 import Units from 'js/Units';
 import assetsManifest from 'assets/manifest';
 import {
     findFood,
 } from 'js/Units/Deer/actions';
+import {clearHotKey} from 'js/App/actions';
 
 const makeEnv = (renderer, scene, camera, store, timeMachine) => (
     {
@@ -47,36 +52,51 @@ export class Map extends Component {
             z: PropTypes.number.isRequired,
         }),
         camera: PropTypes.shape({
-            x: PropTypes.number.isRequired,
-            y: PropTypes.number.isRequired,
-            z: PropTypes.number.isRequired,
+            position: PropTypes.shape({
+                x: PropTypes.number.isRequired,
+                y: PropTypes.number.isRequired,
+                z: PropTypes.number.isRequired,
+            }),
+            rotation: PropTypes.number.isRequired,
+            translate: PropTypes.shape({
+                x: PropTypes.number.isRequired,
+                y: PropTypes.number.isRequired,
+                z: PropTypes.number.isRequired,
+            }),
+            zoom: PropTypes.number.isRequired,
         }),
         mouseKey: PropTypes.string.isRequired,
+        hotKey: PropTypes.string.isRequired,
         findItemUnderMouse: PropTypes.func.isRequired,
         addUnitAtPoint: PropTypes.func.isRequired,
-        setCamera: PropTypes.func.isRequired,
         cursorClicked: PropTypes.func.isRequired,
         findFood: PropTypes.func.isRequired,
+        moveCamera: PropTypes.func.isRequired,
+        rotateCamera: PropTypes.func.isRequired,
+        zoomCamera: PropTypes.func.isRequired,
+        clearHotKey: PropTypes.func.isRequired,
     }
 
     componentDidMount() {
         const {
             viewPort,
             size,
+            camera,
         } = this.props;
 
         this.units = {};
         this.selectedableUnits = {};
-        this.zoom = 0.5;
         this.renderer = new THREE.WebGLRenderer({antialias: true});
+        this.cameraGroup = new THREE.Group();
         this.camera = new THREE.OrthographicCamera(
-            (viewPort.width / - 2) / this.zoom,
-            (viewPort.width / 2) / this.zoom,
-            (viewPort.height / 2) / this.zoom,
-            (viewPort.height / - 2) / this.zoom,
+            (viewPort.width / - 2) * camera.zoom,
+            (viewPort.width / 2) * camera.zoom,
+            (viewPort.height / 2) * camera.zoom,
+            (viewPort.height / - 2) * camera.zoom,
             1,
             10000
         );
+        this.cameraGroup.add(this.camera);
         this.scene = new THREE.Scene();
         this.floor = new THREE.Mesh(
             new THREE.BoxGeometry(size.x, 1, size.z),
@@ -102,7 +122,9 @@ export class Map extends Component {
         this.renderer.gammaInput = true;
         this.renderer.gammaOutput = true;
 
-        this.camera.position.set(-2000, 2000, -2000);
+        this.cameraGroup.position.set(camera.position.x, camera.position.y, camera.position.z);
+        this.cameraGroup.rotation.set(0, camera.rotation, 0);
+        this.camera.position.set(camera.translate.x, camera.translate.y, camera.translate.z);
         this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 
         directionalLight.position.copy(lightPosition);
@@ -121,7 +143,7 @@ export class Map extends Component {
         this.floor.receiveShadow = true;
         this.floor.position.set(size.x / 2, -0.5, size.z / 2);
 
-        this.scene.add(this.camera);
+        this.scene.add(this.cameraGroup);
         this.scene.add(this.floor);
         this.scene.add(ambient);
         this.scene.add(directionalLight);
@@ -153,12 +175,41 @@ export class Map extends Component {
             }
         }
 
+        if (this.props.hotKey !== nextProps.hotKey) {
+            if (nextProps.hotKey === 'KeyA') {
+                this.props.moveCamera('left');
+            }
+            else if (nextProps.hotKey === 'KeyW') {
+                this.props.moveCamera('forward');
+            }
+            else if (nextProps.hotKey === 'KeyS') {
+                this.props.moveCamera('backward');
+            }
+            else if (nextProps.hotKey === 'KeyD') {
+                this.props.moveCamera('right');
+            }
+            else if (nextProps.hotKey === 'KeyQ') {
+                this.props.rotateCamera(-Math.PI / 32);
+            }
+            else if (nextProps.hotKey === 'KeyE') {
+                this.props.rotateCamera(Math.PI / 32);
+            }
+            else if (nextProps.hotKey === 'KeyZ') {
+                this.props.zoomCamera(-0.1);
+            }
+            else if (nextProps.hotKey === 'KeyC') {
+                this.props.zoomCamera(0.1);
+            }
+
+            this.props.clearHotKey();
+        }
+
         if (nextProps.camera !== this.props.camera) {
-            this.cameraPosition.set(
-                nextProps.camera.x,
-                nextProps.camera.y,
-                nextProps.camera.z
-            );
+            this.cameraGroup.position.set(nextProps.camera.position.x, nextProps.camera.position.y, nextProps.camera.position.z);
+            this.cameraGroup.rotation.set(0, nextProps.camera.rotation, 0);
+            this.camera.position.set(nextProps.camera.translate.x, nextProps.camera.translate.y, nextProps.camera.translate.z);
+
+            this.env.render();
         }
 
         if (nextProps.population !== this.props.population) {
@@ -190,16 +241,16 @@ export class Map extends Component {
             });
         }
 
-        if (nextProps.viewPort !== this.props.viewPort) {
+        if (nextProps.viewPort !== this.props.viewPort || nextProps.camera.zoom !== this.props.camera.zoom) {
             const {
                 width,
                 height,
             } = nextProps.viewPort;
 
-            this.camera.left = (width / - 2) / this.zoom;
-            this.camera.right = (width / 2) / this.zoom;
-            this.camera.top = (height / 2) / this.zoom;
-            this.camera.bottom = (height / - 2) / this.zoom;
+            this.camera.left = (width / - 2) * nextProps.camera.zoom;
+            this.camera.right = (width / 2) * nextProps.camera.zoom;
+            this.camera.top = (height / 2) * nextProps.camera.zoom;
+            this.camera.bottom = (height / - 2) * nextProps.camera.zoom;
             this.renderer.setSize(width, height);
 
             this.camera.updateProjectionMatrix();
@@ -292,14 +343,18 @@ const mapStateToProps = createStructuredSelector({
     size: (state) => state.map.size,
     camera: (state) => state.map.camera,
     mouseKey: (state) => state.app.mouseKey,
+    hotKey: (state) => state.app.hotKey,
 });
 
 const mapDispatchToProps = {
     findItemUnderMouse,
     addUnitAtPoint,
-    setCamera,
     cursorClicked,
     findFood,
+    moveCamera,
+    rotateCamera,
+    zoomCamera,
+    clearHotKey,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Map);

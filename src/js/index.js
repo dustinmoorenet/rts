@@ -11,7 +11,10 @@ import {
     listenToWindowSize,
     listenToMouse,
 } from 'js/App/actions';
-import {setSize} from 'js/Map/actions';
+import {
+    setSize,
+    setCamera,
+} from 'js/Map/actions';
 
 global.store = configureStore({debug: process.env.NODE_ENV === ''});
 global.timeMachine = configureTimeMachine({debug: process.env.NODE_ENV === ''});
@@ -19,6 +22,12 @@ global.timeMachine = configureTimeMachine({debug: process.env.NODE_ENV === ''});
 global.timeMachine.dispatch(setRealTime(Date.now()));
 global.timeMachine.dispatch(start());
 global.store.dispatch(setSize({x: 2000, y: 500, z: 2000}));
+global.store.dispatch(setCamera(
+    {x: 0, y: 0, z: 0},
+    Math.PI / 4,
+    {x: 0, y: 2000, z: -2000},
+    1
+));
 global.store.dispatch(listenToKeys());
 global.store.dispatch(listenToMouse());
 global.store.dispatch(listenToWindowSize());

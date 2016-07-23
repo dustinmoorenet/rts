@@ -89,6 +89,17 @@ export function addUnitAtPoint(type, point) {
             });
         }
 
+        if (type === 'deer') {
+            tasks.push({
+                type: 'goTo',
+                payload: {
+                    x: 300,
+                    y: 0,
+                    z: 300,
+                },
+            });
+        }
+
         const id = uniqueId();
 
         dispatch(addUnit({
